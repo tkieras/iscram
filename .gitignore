@@ -1,0 +1,14 @@
+*.pyc
+*.pyo
+
+.DS_Store
+._*
+
+*.svg
+run_all.sh
+
+1-analysis-perturb/*
+2-frontend-exper-db/*
+2-micro-version/*
+output/*
+iscram/tests/*
