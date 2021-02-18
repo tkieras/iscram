@@ -1,0 +1,168 @@
+from iscram.domain.model import (
+    Component, Supplier, Indicator, RiskRelation,
+    Offering, SystemGraph
+)
+
+
+def test_empty_sg():
+    sg = SystemGraph("test", frozenset(), frozenset(), frozenset(), frozenset(), Indicator("and", frozenset()))
+
+    assert sg.validate()
+
+
+def test_full_sg():
+    components = frozenset([Component(i, "name") for i in range(10)])
+
+    suppliers = frozenset([Supplier(i, "name") for i in range(10, 20)])
+
+    indicator = Indicator("and", frozenset([RiskRelation(i, -1) for i in {1, 2, 3}]))
+
+    offerings = frozenset({Offering(15, 5, 0.5, 30), Offering(16, 5, 0.5, 30), Offering(17, 3, 0.5, 30)})
+
+    deps = frozenset({RiskRelation(1, 3), RiskRelation(2, 3), RiskRelation(5, 6)})
+
+    sg = SystemGraph("test", components, suppliers, deps, offerings, indicator)
+
+    assert sg.validate()
+
+
+def test_mismatched_indicator():
+    components = frozenset([Component(i, "name") for i in range(10)])
+
+    suppliers = frozenset([Supplier(i, "name") for i in range(10, 20)])
+
+    indicator = Indicator("and", frozenset([RiskRelation(i, -1) for i in {10, 15, 35}]))
+
+    offerings = frozenset({Offering(15, 5, 0.5, 30), Offering(16, 5, 0.5, 30), Offering(17, 3, 0.5, 30)})
+
+    deps = frozenset({RiskRelation(1, 3), RiskRelation(2, 3), RiskRelation(5, 6)})
+
+    sg = SystemGraph("test", components, suppliers, deps, offerings, indicator)
+
+    assert not sg.validate()
+
+
+def test_mismatched_offerings():
+    components = frozenset([Component(i, "name") for i in range(10)])
+
+    suppliers = frozenset([Supplier(i, "name") for i in range(10, 20)])
+
+    indicator = Indicator("and", frozenset([RiskRelation(i, -1) for i in {1, 2, 3}]))
+
+    offerings = frozenset({Offering(15, 300, 0.5, 30), Offering(413, 5, 0.5, 30), Offering(17, 3, 0.5, 30)})
+
+    deps = frozenset({RiskRelation(1, 3), RiskRelation(2, 3), RiskRelation(5, 6)})
+
+    sg = SystemGraph("test", components, suppliers, deps, offerings, indicator)
+
+    assert not sg.validate()
+
+
+def test_mismatched_deps():
+    components = frozenset([Component(i, "name") for i in range(10)])
+
+    suppliers = frozenset([Supplier(i, "name") for i in range(10, 20)])
+
+    indicator = Indicator("and", frozenset([RiskRelation(i, -1) for i in {1, 2, 3}]))
+
+    offerings = frozenset({Offering(15, 5, 0.5, 30), Offering(16, 5, 0.5, 30), Offering(17, 3, 0.5, 30)})
+
+    deps = frozenset({RiskRelation(100, 3), RiskRelation(23, 3), RiskRelation(5, 6)})
+
+    sg = SystemGraph("test", components, suppliers, deps, offerings, indicator)
+
+    assert not sg.validate()
+
+
+def test_overlapping_ids():
+    components = frozenset([Component(i, "name") for i in range(10)])
+
+    suppliers = frozenset([Supplier(i, "name") for i in range(15)])
+
+    indicator = Indicator("and", frozenset([RiskRelation(i, -1) for i in {1, 2, 3}]))
+
+    offerings = frozenset({Offering(12, 5, 0.5, 30), Offering(11, 5, 0.5, 30), Offering(12, 3, 0.5, 30)})
+
+    deps = frozenset({RiskRelation(1, 3), RiskRelation(2, 3), RiskRelation(5, 6)})
+
+    sg = SystemGraph("test", components, suppliers, deps, offerings, indicator)
+
+    assert not sg.validate()
+
+
+def test_internally_overlapping_ids():
+    components = set([Component(i, "name") for i in range(10)])
+
+    components.add(Component(3, "test"))
+
+    components = frozenset(components)
+
+    suppliers = frozenset([Supplier(i, "name") for i in range(10, 20)])
+
+    indicator = Indicator("and", frozenset([RiskRelation(i, -1) for i in {1, 2, 3}]))
+
+    offerings = frozenset({Offering(12, 5, 0.5, 30), Offering(11, 5, 0.5, 30), Offering(12, 3, 0.5, 30)})
+
+    deps = frozenset({RiskRelation(1, 3), RiskRelation(2, 3), RiskRelation(5, 6)})
+
+    sg = SystemGraph("test", components, suppliers, deps, offerings, indicator)
+
+    assert not sg.validate()
+
+
+def test_hash_equal():
+    components = frozenset([Component(i, "name") for i in range(10)])
+
+    suppliers = frozenset([Supplier(i, "name") for i in range(10, 20)])
+
+    indicator = Indicator("and", frozenset([RiskRelation(i, -1) for i in {1, 2, 3}]))
+
+    offerings = frozenset({Offering(15, 5, 0.5, 30), Offering(16, 5, 0.5, 30), Offering(17, 3, 0.5, 30)})
+
+    deps = frozenset({RiskRelation(1, 3), RiskRelation(2, 3), RiskRelation(5, 6)})
+
+    sg = SystemGraph("test", components, suppliers, deps, offerings, indicator)
+
+    components_2 = frozenset([Component(i, "name") for i in range(10)])
+
+    suppliers_2 = frozenset([Supplier(i, "name") for i in range(10, 20)])
+
+    indicator_2 = Indicator("and", frozenset([RiskRelation(i, -1) for i in {1, 2, 3}]))
+
+    offerings_2 = frozenset({Offering(15, 5, 0.5, 30), Offering(16, 5, 0.5, 30), Offering(17, 3, 0.5, 30)})
+
+    deps_2 = frozenset({RiskRelation(1, 3), RiskRelation(2, 3), RiskRelation(5, 6)})
+
+    sg_2 = SystemGraph("test", components_2, suppliers_2, deps_2, offerings_2, indicator_2)
+
+    assert id(sg) != id(sg_2)
+    assert hash(sg) == hash(sg_2)
+
+
+def test_hash_not_equal():
+    components = frozenset([Component(i, "name") for i in range(10)])
+
+    suppliers = frozenset([Supplier(i, "name") for i in range(10, 20)])
+
+    indicator = Indicator("and", frozenset([RiskRelation(i, -1) for i in {1, 2, 3}]))
+
+    offerings = frozenset({Offering(15, 5, 0.5, 30), Offering(16, 5, 0.5, 30), Offering(17, 3, 0.5, 30)})
+
+    deps = frozenset({RiskRelation(1, 3), RiskRelation(2, 3), RiskRelation(5, 6)})
+
+    sg = SystemGraph("test", components, suppliers, deps, offerings, indicator)
+
+    components_2 = frozenset([Component(i, "name") for i in range(10)])
+
+    suppliers_2 = frozenset([Supplier(i, "name") for i in range(10, 20)])
+
+    indicator_2 = Indicator("and", frozenset([RiskRelation(i, -1) for i in {1, 2, 3}]))
+
+    offerings_2 = frozenset({Offering(15, 5, 0.49999, 30), Offering(16, 5, 0.5, 30), Offering(17, 3, 0.5, 30)})
+
+    deps_2 = frozenset({RiskRelation(1, 3), RiskRelation(2, 3), RiskRelation(5, 6)})
+
+    sg_2 = SystemGraph("test", components_2, suppliers_2, deps_2, offerings_2, indicator_2)
+
+    assert id(sg) != id(sg_2)
+    assert hash(sg) != hash(sg_2)
