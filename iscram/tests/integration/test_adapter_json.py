@@ -1,3 +1,5 @@
+from importlib.resources import read_text
+
 from iscram.domain.model import (
     SystemGraph, Indicator, Component, Supplier, RiskRelation, Offering
 )
@@ -84,3 +86,11 @@ def test_adapter_save_json():
     with open("tmp_test_output.json", "w") as outfile:
         outfile.write(dump_system_graph_json_str(sg))
 
+
+def test_adapter_load_json_str():
+    json_str = read_text("iscram.tests.system_graph_test_data", "simple_and.json")
+
+    sg = load_system_graph_json_str(json_str)
+
+    assert(sg.name == "simple")
+    assert(len(sg.components) == 3)

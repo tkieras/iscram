@@ -55,21 +55,31 @@ def get_tree_boolean_function_lambda(n, graph, logic, fmt=None):
     return eval(fn_str)
 
 
-def is_tree(graph) -> bool:
-    inverted_graph = {}
+def is_tree(graph, root) -> bool:
+    nodes = set()
+    edges = set()
 
     for node in graph:
-        children = graph.get(node, set())
+        nodes.add(node)
+        children = graph.get(node, [])
         for child in children:
-            inverted_adj = inverted_graph.get(child, set())
-            inverted_adj.add(node)
-            inverted_graph[child] = inverted_adj
+            nodes.add(child)
+            edges.add((node, child))
 
-    for node in inverted_graph:
-        if len(inverted_graph[node]) > 1:
-            return False
+    if len(nodes) != len(edges) + 1:
+        return False
 
-    return True
+    visited = set()
+    queue = [root]
+
+    while queue:
+        v = queue.pop(0)
+        visited.add(v)
+        children = graph.get(v, [])
+        for child in children:
+            queue.append(child)
+
+    return len(visited) == len(nodes)
 
 
 def convert_system_graph_to_tree(sg: SystemGraph, ignore_suppliers):
@@ -96,7 +106,7 @@ def convert_system_graph_to_tree(sg: SystemGraph, ignore_suppliers):
             adj.add(o.supplier_id)
             graph[o.component_id] = adj
 
-    if not is_tree(graph):
+    if not is_tree(graph, -1):
         raise TreeError
 
     return graph, logic

@@ -166,3 +166,4 @@ def test_hash_not_equal():
 
     assert id(sg) != id(sg_2)
     assert hash(sg) != hash(sg_2)
+

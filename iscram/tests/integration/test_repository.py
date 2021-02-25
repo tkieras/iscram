@@ -68,6 +68,15 @@ def test_fake_repository_put():
     assert repo.storage[sg]["risk"] == expected
 
 
+def test_fake_repository_get_bad_key(simple_and: SystemGraph):
+    repo = FakeRepository()
+
+    get_risk(simple_and, repo)
+
+    with pytest.raises(RepositoryError):
+        repo.get(simple_and, "ice cream")
+
+
 def test_fake_repository_delete():
     components = frozenset({Component(1, "one", "and", 0.5),
                             Component(2, "two", "and", 0.5),
@@ -90,5 +99,5 @@ def test_fake_repository_delete():
     repo.delete(sg, "risk")
 
     with pytest.raises(RepositoryError):
-        repo.get(sg, "risk")
+        repo.delete(sg, "risk")
 

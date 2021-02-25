@@ -20,6 +20,13 @@
       "logic_function": "and",
       "name": "one",
       "risk": 0.25
+    },
+    {
+      "cost": 0,
+      "identifier": 4,
+      "logic_function": "and",
+      "name": "four",
+      "risk": 0.25
     }
   ],
   "indicator": {
@@ -41,6 +48,14 @@
     {
       "risk_dst_id": 3,
       "risk_src_id": 1
+    },
+    {
+      "risk_dst_id" : 2,
+      "risk_src_id" : 4
+    },
+    {
+      "risk_dst_id" : 1,
+      "risk_src_id" : 4
     }
   ],
   "suppliers": []

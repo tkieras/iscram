@@ -3,9 +3,7 @@ import pytest
 from iscram.domain.metrics.cutset import (
     MOCUSError, mocus, brute_force_find_cutsets
 )
-from iscram.domain.metrics.graph_functions import (
-    is_tree, enumerate_all_combinations
-)
+
 from iscram.domain.model import (
     Component, Supplier, Indicator, RiskRelation,
     Offering, SystemGraph
@@ -76,26 +74,6 @@ def test_mocus_success_simple_or():
     cutsets = mocus(sg)
 
     assert cutsets == expected
-
-
-def test_mocus_tree_check_failure():
-    graph = {
-        1: {2, 3},
-        2: {4},
-        3: {4}
-    }
-
-    assert not is_tree(graph)
-
-
-def test_mocus_tree_check_success():
-    graph = {
-        3: {1, 2},
-        2: {4},
-        1: {5}
-    }
-
-    assert is_tree(graph)
 
 
 def test_mocus_simple_supplier_success():
@@ -178,14 +156,9 @@ def test_mocus_gigantic_mixed():
     pass
 
 
-def test_enumerate_all_combinations():
-
-    x = [1, 2, 3]
-    expected = {tuple(), (1,), (2,), (3,), (1, 2), (2, 3), (1, 3), (1, 2, 3)}
-
-    result = set(enumerate_all_combinations(x))
-
-    assert result == expected
+def test_mocus_non_tree(non_tree_simple_and: SystemGraph):
+    with pytest.raises(MOCUSError):
+        cutsets = mocus(non_tree_simple_and)
 
 
 def test_brute_force_cutsets_simple_and():
@@ -204,6 +177,12 @@ def test_brute_force_cutsets_simple_and():
     cutsets = brute_force_find_cutsets(sg)
 
     assert cutsets == expected
+
+
+def test_brute_force_empty():
+    sg = SystemGraph("none", frozenset(), frozenset(), frozenset(), frozenset(), Indicator("and", frozenset()))
+
+    assert(len(brute_force_find_cutsets(sg)) == 0)
 
 
 def test_brute_force_cutsets_simple_or():
