@@ -82,7 +82,7 @@ def is_tree(graph, root) -> bool:
     return len(visited) == len(nodes)
 
 
-def convert_system_graph_to_tree(sg: SystemGraph, ignore_suppliers):
+def get_graph_dicts_from_system_graph(sg: SystemGraph, ignore_suppliers):
     logic = {-1: sg.indicator.logic_function}
 
     for c in sg.components:
@@ -106,8 +106,8 @@ def convert_system_graph_to_tree(sg: SystemGraph, ignore_suppliers):
             adj.add(o.supplier_id)
             graph[o.component_id] = adj
 
-    if not is_tree(graph, -1):
-        raise TreeError
+    # if not is_tree(graph, -1):
+    #     raise TreeError
 
     return graph, logic
 

@@ -2,19 +2,29 @@ from importlib.resources import read_text
 import random
 
 import pytest
-from numpy.random import randint
 
-from iscram.domain.metrics.graph_functions import is_tree
 from iscram.adapters.json import load_system_graph_json_str
 
 from iscram.domain.model import (
     SystemGraph, Component, Supplier, RiskRelation, Offering, Indicator
 )
 
-
 @pytest.fixture
 def simple_and():
     json_str = read_text("iscram.tests.system_graph_test_data", "simple_and.json")
+
+    return load_system_graph_json_str(json_str)
+
+@pytest.fixture
+def simple_or():
+    json_str = read_text("iscram.tests.system_graph_test_data", "simple_or.json")
+
+    return load_system_graph_json_str(json_str)
+
+
+@pytest.fixture
+def canonical():
+    json_str = read_text("iscram.tests.system_graph_test_data", "canonical.json")
 
     return load_system_graph_json_str(json_str)
 

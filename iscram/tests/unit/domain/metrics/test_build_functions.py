@@ -1,5 +1,5 @@
 from iscram.domain.metrics.graph_functions import (
-    get_tree_boolean_function_lambda, convert_system_graph_to_tree
+    get_tree_boolean_function_lambda, get_graph_dicts_from_system_graph
 )
 
 from iscram.domain.model import (
@@ -16,7 +16,7 @@ def test_build_simple_logic_and():
 
     sg = SystemGraph("simple", components, frozenset(), deps, frozenset(), indicator)
 
-    graph, logic = convert_system_graph_to_tree(sg, ignore_suppliers=True)
+    graph, logic = get_graph_dicts_from_system_graph(sg, ignore_suppliers=True)
 
     fn = get_tree_boolean_function_lambda(-1, graph, logic)
 
@@ -50,7 +50,7 @@ def test_build_simple_logic_or():
 
     sg = SystemGraph("simple", components, frozenset(), deps, frozenset(), indicator)
 
-    graph, logic = convert_system_graph_to_tree(sg, ignore_suppliers=True)
+    graph, logic = get_graph_dicts_from_system_graph(sg, ignore_suppliers=True)
 
     fn = get_tree_boolean_function_lambda(-1, graph, logic)
 

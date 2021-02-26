@@ -7,7 +7,7 @@ from iscram.domain.model import (
 def test_empty_sg():
     sg = SystemGraph("test", frozenset(), frozenset(), frozenset(), frozenset(), Indicator("and", frozenset()))
 
-    assert sg.validate()
+    assert sg.valid_values()
 
 
 def test_full_sg():
@@ -23,7 +23,7 @@ def test_full_sg():
 
     sg = SystemGraph("test", components, suppliers, deps, offerings, indicator)
 
-    assert sg.validate()
+    assert sg.valid_values()
 
 
 def test_mismatched_indicator():
@@ -39,7 +39,7 @@ def test_mismatched_indicator():
 
     sg = SystemGraph("test", components, suppliers, deps, offerings, indicator)
 
-    assert not sg.validate()
+    assert not sg.valid_values()
 
 
 def test_mismatched_offerings():
@@ -55,7 +55,7 @@ def test_mismatched_offerings():
 
     sg = SystemGraph("test", components, suppliers, deps, offerings, indicator)
 
-    assert not sg.validate()
+    assert not sg.valid_values()
 
 
 def test_mismatched_deps():
@@ -71,7 +71,7 @@ def test_mismatched_deps():
 
     sg = SystemGraph("test", components, suppliers, deps, offerings, indicator)
 
-    assert not sg.validate()
+    assert not sg.valid_values()
 
 
 def test_overlapping_ids():
@@ -87,7 +87,7 @@ def test_overlapping_ids():
 
     sg = SystemGraph("test", components, suppliers, deps, offerings, indicator)
 
-    assert not sg.validate()
+    assert not sg.valid_values()
 
 
 def test_internally_overlapping_ids():
@@ -107,7 +107,7 @@ def test_internally_overlapping_ids():
 
     sg = SystemGraph("test", components, suppliers, deps, offerings, indicator)
 
-    assert not sg.validate()
+    assert not sg.valid_values()
 
 
 def test_hash_equal():

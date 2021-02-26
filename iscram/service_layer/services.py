@@ -1,15 +1,8 @@
-from iscram.domain.model import (
-    SystemGraph
-)
-
+from iscram.domain.model import SystemGraph
 from iscram.adapters.repository import (
     AbstractRepository, RepositoryError
 )
-
-from iscram.domain.metrics.risk import (
-    risk_by_cutsets
-)
-
+from iscram.domain.metrics.risk import risk_by_cutsets
 from iscram.domain.metrics.importance import (
     birnbaum_importance, birnbaum_structural_importance
 )

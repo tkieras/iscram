@@ -1,6 +1,7 @@
-from dataclasses import dataclass, field
+from dataclasses import field
 from typing import FrozenSet
 
+from pydantic.dataclasses import dataclass
 
 def validate_name(name: str) -> bool:
     return len(name) > 0
@@ -26,7 +27,7 @@ class Component:
     risk: float = 0.0
     cost: int = 0
 
-    def validate(self):
+    def valid_values(self):
         return all([validate_name(self.name),
                     validate_logic_function(self.logic_function),
                     validate_risk(self.risk),
@@ -39,7 +40,7 @@ class Supplier:
     name: str
     trust: float = 1.0
 
-    def validate(self):
+    def valid_values(self):
         return all([validate_name(self.name),
                     validate_risk(self.trust)])
 
@@ -51,7 +52,7 @@ class Offering:
     risk: float
     cost: int
 
-    def validate(self):
+    def valid_values(self):
         return all([self.supplier_id != self.component_id,
                     validate_risk(self.risk),
                     validate_cost(self.cost)])
@@ -68,7 +69,7 @@ class Indicator:
     logic_function: str
     dependencies: FrozenSet[RiskRelation] = field(default_factory=set)
 
-    def validate(self):
+    def valid_values(self):
         return all([all([d.risk_dst_id == -1 for d in self.dependencies]),
                     validate_logic_function(self.logic_function)])
 
@@ -82,11 +83,11 @@ class SystemGraph:
     offerings: FrozenSet[Offering]
     indicator: Indicator
 
-    def validate(self):
+    def valid_values(self):
         parts = all([validate_name(self.name),
-                     all([c.validate() for c in self.components]),
-                     all([s.validate() for s in self.suppliers]),
-                     all([o.validate() for o in self.offerings]),
+                     all([c.valid_values() for c in self.components]),
+                     all([s.valid_values() for s in self.suppliers]),
+                     all([o.valid_values() for o in self.offerings]),
                      ])
 
         valid_supplier_ids = set([s.identifier for s in self.suppliers])

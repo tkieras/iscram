@@ -69,7 +69,7 @@ def test_adapter_json_load_dump_same():
 
     assert sg == loaded
 
-    assert loaded.validate()
+    assert loaded.valid_values()
 
 
 def test_adapter_save_json():

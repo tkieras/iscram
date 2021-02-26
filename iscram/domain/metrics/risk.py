@@ -3,7 +3,7 @@ import math
 from iscram.domain.model import SystemGraph
 from iscram.domain.metrics.cutset import find_minimal_cutsets
 from iscram.domain.metrics.graph_functions import (
-    probability_union, get_tree_boolean_function_lambda, fmt_prob, convert_system_graph_to_tree
+    probability_union, get_tree_boolean_function_lambda, fmt_prob, get_graph_dicts_from_system_graph
 )
 
 
@@ -34,7 +34,7 @@ def risk_by_function(sg: SystemGraph, x=None, ignore_suppliers=True):
     if x is None:
         x = collect_x(sg)
 
-    graph, logic = convert_system_graph_to_tree(sg, ignore_suppliers)
+    graph, logic = get_graph_dicts_from_system_graph(sg, ignore_suppliers)
     fn = get_tree_boolean_function_lambda(-1, graph, logic, fmt_prob)
 
     return fn(x)

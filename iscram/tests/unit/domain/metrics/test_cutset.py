@@ -44,34 +44,16 @@ def test_mocus_ignore_supplier_check_success():
     cutsets = mocus(sg, ignore_suppliers=False)
 
 
-def test_mocus_success_simple_and():
-    components = {Component(1, "one", "and"), Component(2, "two", "and"), Component(3, "three", "and")}
-
-    indicator = Indicator("and", {RiskRelation(3, -1)})
-
-    deps = {RiskRelation(1, 3), RiskRelation(2, 3)}
-
-    sg = SystemGraph("simple", components, set(), deps, set(), indicator)
-
+def test_mocus_success_simple_and(simple_and: SystemGraph):
     expected = frozenset([frozenset([1, 2]), frozenset([3])])
-
-    cutsets = mocus(sg)
+    cutsets = mocus(simple_and)
 
     assert cutsets == expected
 
 
-def test_mocus_success_simple_or():
-    components = {Component(1, "one", "and"), Component(2, "two", "and"), Component(3, "three", "or")}
-
-    indicator = Indicator("and", {RiskRelation(3, -1)})
-
-    deps = {RiskRelation(1, 3), RiskRelation(2, 3)}
-
-    sg = SystemGraph("simple", components, set(), deps, set(), indicator)
-
+def test_mocus_success_simple_or(simple_or: SystemGraph):
     expected = frozenset([frozenset([1]), frozenset([2]), frozenset([3])])
-
-    cutsets = mocus(sg)
+    cutsets = mocus(simple_or)
 
     assert cutsets == expected
 
@@ -101,30 +83,7 @@ def test_mocus_simple_supplier_success():
     assert cutsets == expected
 
 
-def test_mocus_canonical():
-    components = {Component(1, "one", "and"),
-                  Component(2, "two", "or"),
-                  Component(3, "three", "and"),
-                  Component(4, "four", "and"),
-                  Component(5, "five", "or"),
-                  Component(6, "six", "and"),
-                  Component(7, "seven", "and"),
-                  Component(8, "eight", "and"),
-                  Component(9, "nine", "and")}
-
-    indicator = Indicator("and", {RiskRelation(1, -1)})
-
-    deps = {RiskRelation(2, 1),
-            RiskRelation(5, 1),
-            RiskRelation(3, 2),
-            RiskRelation(4, 2),
-            RiskRelation(6, 5),
-            RiskRelation(7, 5),
-            RiskRelation(8, 4),
-            RiskRelation(9, 4)}
-
-    sg = SystemGraph("simple", components, set(), deps, set(), indicator)
-
+def test_mocus_canonical(canonical: SystemGraph):
     expected = frozenset([frozenset([1]),
                           frozenset([2, 5]),
                           frozenset([3, 5]),
@@ -139,7 +98,7 @@ def test_mocus_canonical():
                           frozenset([4, 7]),
                           frozenset([8, 9, 7])])
 
-    cutsets = mocus(sg)
+    cutsets = mocus(canonical)
 
     assert cutsets == expected
 
@@ -156,25 +115,67 @@ def test_mocus_gigantic_mixed():
     pass
 
 
-def test_mocus_non_tree(non_tree_simple_and: SystemGraph):
-    with pytest.raises(MOCUSError):
-        cutsets = mocus(non_tree_simple_and)
+def test_mocus_simple_non_tree(non_tree_simple_and: SystemGraph):
+    cutsets = mocus(non_tree_simple_and)
+    expected = frozenset([frozenset([3]), frozenset([1,2]), frozenset([4])])
+
+    assert cutsets == expected
 
 
-def test_brute_force_cutsets_simple_and():
-    components = frozenset({Component(1, "one", "and"),
-                            Component(2, "two", "and"),
-                            Component(3, "three", "and")})
+def test_mocus_complex_non_tree():
+    components = frozenset([
+        Component(1, "one", "and"),
+        Component(2, "two", "and"),
+        Component(3, "three", "and"),
+        Component(4, "four", "or"),
+        Component(5, "five", "or"),
+        Component(6, "six", "or"),
+        Component(7, "seven", "or"),
+        Component(8, "eight", "or"),
+        Component(9, "nine", "or"),
+        Component(10, "ten", "or")
+    ])
 
-    indicator = Indicator("and", frozenset({RiskRelation(3, -1)}))
+    deps = frozenset([
+        RiskRelation(10, 9),
+        RiskRelation(10, 8),
+        RiskRelation(8, 4),
+        RiskRelation(8, 6),
+        RiskRelation(9, 7),
+        RiskRelation(9, 5),
+        RiskRelation(4, 2),
+        RiskRelation(6, 2),
+        RiskRelation(7, 3),
+        RiskRelation(5, 3),
+        RiskRelation(2, 1),
+        RiskRelation(3, 1)
+    ])
 
-    deps = frozenset({RiskRelation(1, 3), RiskRelation(2, 3)})
+    indicator = Indicator("and", frozenset([RiskRelation(1, -1)]))
+    suppliers = frozenset()
+    offerings = frozenset()
+    sg = SystemGraph("complex_or_nontree", components, suppliers, deps, offerings, indicator)
 
-    sg = SystemGraph("simple", components, frozenset(), deps, frozenset(), indicator)
+    cutsets = mocus(sg)
+    expected = frozenset([
+        frozenset([1]),
+        frozenset([2,3]),
+        frozenset([4,6,7,5]),
+        frozenset([8,9]),
+        frozenset([10]),
+        frozenset([8,3]),
+        frozenset([9,2]),
+        frozenset([4,6,3]),
+        frozenset([4,6,9]),
+        frozenset([7,5,8]),
+        frozenset([7,5,2])
+    ])
+    assert cutsets == expected
 
+
+def test_brute_force_cutsets_simple_and(simple_and: SystemGraph):
     expected = frozenset([frozenset([1, 2]), frozenset([3])])
-
-    cutsets = brute_force_find_cutsets(sg)
+    cutsets = brute_force_find_cutsets(simple_and)
 
     assert cutsets == expected
 
@@ -185,46 +186,14 @@ def test_brute_force_empty():
     assert(len(brute_force_find_cutsets(sg)) == 0)
 
 
-def test_brute_force_cutsets_simple_or():
-    components = {Component(1, "one", "and"), Component(2, "two", "and"), Component(3, "three", "or")}
-
-    indicator = Indicator("and", {RiskRelation(3, -1)})
-
-    deps = {RiskRelation(1, 3), RiskRelation(2, 3)}
-
-    sg = SystemGraph("simple", components, set(), deps, set(), indicator)
-
+def test_brute_force_cutsets_simple_or(simple_or: SystemGraph):
     expected = frozenset([frozenset([1]), frozenset([2]), frozenset([3])])
-
-    cutsets = brute_force_find_cutsets(sg)
+    cutsets = brute_force_find_cutsets(simple_or)
 
     assert cutsets == expected
 
 
-def test_brute_force_cutsets_canonical():
-    components = {Component(1, "one", "and"),
-                  Component(2, "two", "or"),
-                  Component(3, "three", "and"),
-                  Component(4, "four", "and"),
-                  Component(5, "five", "or"),
-                  Component(6, "six", "and"),
-                  Component(7, "seven", "and"),
-                  Component(8, "eight", "and"),
-                  Component(9, "nine", "and")}
-
-    indicator = Indicator("and", {RiskRelation(1, -1)})
-
-    deps = {RiskRelation(2, 1),
-            RiskRelation(5, 1),
-            RiskRelation(3, 2),
-            RiskRelation(4, 2),
-            RiskRelation(6, 5),
-            RiskRelation(7, 5),
-            RiskRelation(8, 4),
-            RiskRelation(9, 4)}
-
-    sg = SystemGraph("simple", components, set(), deps, set(), indicator)
-
+def test_brute_force_cutsets_canonical(canonical: SystemGraph):
     expected = frozenset([frozenset([1]),
                           frozenset([2, 5]),
                           frozenset([3, 5]),
@@ -239,6 +208,6 @@ def test_brute_force_cutsets_canonical():
                           frozenset([4, 7]),
                           frozenset([8, 9, 7])])
 
-    cutsets = brute_force_find_cutsets(sg)
+    cutsets = brute_force_find_cutsets(canonical)
 
     assert cutsets == expected

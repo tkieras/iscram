@@ -3,7 +3,7 @@ from collections import Counter
 
 from iscram.domain.model import SystemGraph
 from iscram.domain.metrics.graph_functions import (
-    convert_system_graph_to_tree, TreeError, get_tree_boolean_function_lambda,
+    get_graph_dicts_from_system_graph, get_tree_boolean_function_lambda,
     enumerate_all_combinations
 )
 
@@ -28,22 +28,14 @@ def mocus(sg: SystemGraph, ignore_suppliers=True) -> FrozenSet[FrozenSet[int]]:
         if any(map(lambda cm: offering_counter[cm] > 1, offering_counter.elements())):
             raise MOCUSError
 
-    # Currently only trees are supported for MOCUS
-    try:
-        graph, logic = convert_system_graph_to_tree(sg, ignore_suppliers)
-    except TreeError:
-        raise MOCUSError
+    graph, logic = get_graph_dicts_from_system_graph(sg, ignore_suppliers)
 
     working_result = [{-1}]
-
     recursive_mocus(-1, graph, logic, working_result)
-
     # The indicator should be removed from the cutsets since it is not a component or supplier
     working_result.remove({-1})
 
-    final_result = frozenset([frozenset(cutset) for cutset in working_result])
-
-    return final_result
+    return minimize_cutsets([frozenset(cutset) for cutset in working_result])
 
 
 def recursive_mocus(n: int, graph: Dict, logic: Dict, cutsets: List[Set]) -> None:
@@ -88,7 +80,7 @@ def brute_force_find_cutsets(sg: SystemGraph) -> FrozenSet[FrozenSet[int]]:
     """ This is brute force and infeasible for even moderate graphs,
     but useful to check methods on small examples """
 
-    graph, logic = convert_system_graph_to_tree(sg, ignore_suppliers=True)
+    graph, logic = get_graph_dicts_from_system_graph(sg, ignore_suppliers=True)
     indicator_fn = get_tree_boolean_function_lambda(-1, graph, logic)
 
     component_ids = {c.identifier for c in sg.components}
@@ -106,7 +98,11 @@ def brute_force_find_cutsets(sg: SystemGraph) -> FrozenSet[FrozenSet[int]]:
         if indicator_fn(test_x):
             temporary_results.append(true_nodes)
 
-    sorted_temp_results = sorted(temporary_results, key=lambda r: len(r))
+    return minimize_cutsets(temporary_results)
+
+
+def minimize_cutsets(cutsets: List[FrozenSet]) -> FrozenSet[FrozenSet[int]]:
+    sorted_temp_results = sorted(cutsets, key=lambda r: len(r))
     try:
         result = [sorted_temp_results[0]]
     except IndexError:
