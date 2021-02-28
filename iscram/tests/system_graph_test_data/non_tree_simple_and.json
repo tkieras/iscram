@@ -2,38 +2,34 @@
   "components": [
     {
       "cost": 0,
-      "identifier": 3,
       "logic_function": "and",
-      "name": "three",
+      "identifier": "three",
       "risk": 0.25
     },
     {
       "cost": 0,
-      "identifier": 2,
       "logic_function": "and",
-      "name": "two",
+      "identifier": "two",
       "risk": 0.25
     },
     {
       "cost": 0,
-      "identifier": 1,
       "logic_function": "and",
-      "name": "one",
+      "identifier": "one",
       "risk": 0.25
     },
     {
       "cost": 0,
-      "identifier": 4,
       "logic_function": "and",
-      "name": "four",
+      "identifier": "four",
       "risk": 0.25
     }
   ],
   "indicator": {
     "dependencies": [
       {
-        "risk_dst_id": -1,
-        "risk_src_id": 3
+        "risk_dst_id": "indicator",
+        "risk_src_id": "three"
       }
     ],
     "logic_function": "and"
@@ -42,20 +38,20 @@
   "offerings": [],
   "security_dependencies": [
     {
-      "risk_dst_id": 3,
-      "risk_src_id": 2
+      "risk_dst_id": "three",
+      "risk_src_id": "two"
     },
     {
-      "risk_dst_id": 3,
-      "risk_src_id": 1
+      "risk_dst_id": "three",
+      "risk_src_id": "one"
     },
     {
-      "risk_dst_id" : 2,
-      "risk_src_id" : 4
+      "risk_dst_id" : "two",
+      "risk_src_id" : "four"
     },
     {
-      "risk_dst_id" : 1,
-      "risk_src_id" : 4
+      "risk_dst_id" : "one",
+      "risk_src_id" : "four"
     }
   ],
   "suppliers": []

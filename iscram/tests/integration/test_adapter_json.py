@@ -1,4 +1,5 @@
 from importlib.resources import read_text
+import tempfile
 
 from iscram.domain.model import (
     SystemGraph, Indicator, Component, Supplier, RiskRelation, Offering
@@ -50,41 +51,25 @@ def test_adapter_json_load_minimal():
     assert sg == expected
 
 
-def test_adapter_json_load_dump_same():
-    components = frozenset([Component(i, "name") for i in range(10)])
-
-    suppliers = frozenset([Supplier(i, "name") for i in range(10, 20)])
-
-    indicator = Indicator("and", frozenset([RiskRelation(i, -1) for i in {1, 2, 3}]))
-
-    offerings = frozenset({Offering(15, 5, 0.5, 30), Offering(16, 5, 0.5, 30), Offering(17, 3, 0.5, 30)})
-
-    deps = frozenset({RiskRelation(1, 3), RiskRelation(2, 3), RiskRelation(5, 6)})
-
-    sg = SystemGraph("test", components, suppliers, deps, offerings, indicator)
-
-    json = dump_system_graph_json(sg)
+def test_adapter_json_load_dump_same(canonical: SystemGraph):
+    json = dump_system_graph_json(canonical)
 
     loaded = load_system_graph_json(json)
 
-    assert sg == loaded
+    assert canonical == loaded
 
     assert loaded.valid_values()
 
 
-def test_adapter_save_json():
-    components = frozenset({Component(1, "one", "and", 0.5),
-                            Component(2, "two", "and", 0.125),
-                            Component(3, "three", "and", 0.75)})
+def test_adapter_save_json(simple_and: SystemGraph):
 
-    indicator = Indicator("and", frozenset({RiskRelation(3, -1)}))
+    with tempfile.TemporaryFile() as fp:
+        fp.write(bytes(dump_system_graph_json_str(simple_and), 'utf-8'))
+        fp.seek(0)
+        json_str = fp.read()
 
-    deps = frozenset({RiskRelation(1, 3), RiskRelation(2, 3)})
-
-    sg = SystemGraph("simple", components, frozenset(), deps, frozenset(), indicator)
-
-    with open("tmp_test_output.json", "w") as outfile:
-        outfile.write(dump_system_graph_json_str(sg))
+    sg_loaded = load_system_graph_json_str(json_str.decode('utf-8'))
+    assert sg_loaded == simple_and
 
 
 def test_adapter_load_json_str():

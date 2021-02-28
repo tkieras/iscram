@@ -2,36 +2,36 @@ from iscram.domain.model import Component
 
 
 def test_invalid_component():
-    c = Component(0, "", "or", 1.0, 30)
+    c = Component("", "or", 1.0, 30)
 
     assert not c.valid_values()
 
-    c = Component(0, "test", "f", 1.0, 30)
+    c = Component("test", "f", 1.0, 30)
 
     assert not c.valid_values()
 
-    c = Component(0, "test", "or", 2.0, 30)
+    c = Component("test", "or", 2.0, 30)
 
     assert not c.valid_values()
 
-    c = Component(0, "test", "or", -1.0, 30)
+    c = Component("test", "or", -1.0, 30)
 
     assert not c.valid_values()
 
-    c = Component(0, "test", "or", 1.0, -5)
+    c = Component("test", "or", 1.0, -5)
 
     assert not c.valid_values()
 
 
 def test_valid_component():
-    c = Component(0, "test", "or", 0.0, 30)
+    c = Component("test", "or", 0.0, 30)
 
     assert c.valid_values()
 
-    c = Component(0, "test", "and", 1.0, 30)
+    c = Component("test", "and", 1.0, 30)
 
     assert c.valid_values()
 
-    c = Component(0, "test", "and", 1.0, 0)
+    c = Component("test", "and", 1.0, 0)
 
     assert c.valid_values()

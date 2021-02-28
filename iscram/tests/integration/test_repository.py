@@ -11,61 +11,32 @@ from iscram.adapters.repository import (
 from iscram.service_layer.services import get_risk
 
 
-def test_fake_repository_risk_put_first():
-    components = frozenset({Component(1, "one", "and"),
-                            Component(2, "two", "and"),
-                            Component(3, "three", "and")})
-
-    indicator = Indicator("and", frozenset({RiskRelation(3, -1)}))
-
-    deps = frozenset({RiskRelation(1, 3), RiskRelation(2, 3)})
-
-    sg = SystemGraph("simple", components, frozenset(), deps, frozenset(), indicator)
-
+def test_fake_repository_risk_put_first(simple_and: SystemGraph):
     repo = FakeRepository()
 
     saved = 0.123456789
 
-    repo.put(sg, "risk", saved)
+    repo.put(simple_and, "risk", saved)
 
-    assert get_risk(sg, repo) == saved
+    assert get_risk(simple_and, repo) == saved
 
 
-def test_fake_repository_risk_calculate_first():
-    components = frozenset({Component(1, "one", "and", 0.5),
-                            Component(2, "two", "and", 0.5),
-                            Component(3, "three", "and", 0.0)})
-
-    indicator = Indicator("and", frozenset({RiskRelation(3, -1)}))
-
-    deps = frozenset({RiskRelation(1, 3), RiskRelation(2, 3)})
-
-    sg = SystemGraph("simple", components, frozenset(), deps, frozenset(), indicator)
+def test_fake_repository_risk_calculate_first(simple_and: SystemGraph):
 
     repo = FakeRepository()
 
-    expected = 0.25
-    assert get_risk(sg, repo) == expected
+    expected = 0.0
+    assert get_risk(simple_and, repo) == expected
 
 
-def test_fake_repository_put():
-    components = frozenset({Component(1, "one", "and", 0.5),
-                            Component(2, "two", "and", 0.5),
-                            Component(3, "three", "and", 0.0)})
-
-    indicator = Indicator("and", frozenset({RiskRelation(3, -1)}))
-
-    deps = frozenset({RiskRelation(1, 3), RiskRelation(2, 3)})
-
-    sg = SystemGraph("simple", components, frozenset(), deps, frozenset(), indicator)
-
+def test_fake_repository_put(simple_and: SystemGraph):
     repo = FakeRepository()
 
-    expected = 0.25
+    expected = 0.0
 
-    get_risk(sg, repo)
+    get_risk(simple_and, repo)
 
-    assert repo.storage[sg]["risk"] == expected
+    assert repo.storage[simple_and]["risk"] == expected
 
 
 def test_fake_repository_get_bad_key(simple_and: SystemGraph):
@@ -77,27 +48,17 @@ def test_fake_repository_get_bad_key(simple_and: SystemGraph):
         repo.get(simple_and, "ice cream")
 
 
-def test_fake_repository_delete():
-    components = frozenset({Component(1, "one", "and", 0.5),
-                            Component(2, "two", "and", 0.5),
-                            Component(3, "three", "and", 0.0)})
-
-    indicator = Indicator("and", frozenset({RiskRelation(3, -1)}))
-
-    deps = frozenset({RiskRelation(1, 3), RiskRelation(2, 3)})
-
-    sg = SystemGraph("simple", components, frozenset(), deps, frozenset(), indicator)
-
+def test_fake_repository_delete(simple_and: SystemGraph):
     repo = FakeRepository()
 
-    expected = 0.25
+    expected = 0.0
 
-    get_risk(sg, repo)
+    get_risk(simple_and, repo)
 
-    assert repo.storage[sg]["risk"] == expected
+    assert repo.storage[simple_and]["risk"] == expected
 
-    repo.delete(sg, "risk")
+    repo.delete(simple_and, "risk")
 
     with pytest.raises(RepositoryError):
-        repo.delete(sg, "risk")
+        repo.delete(simple_and, "risk")
 

@@ -6,14 +6,16 @@ def test_invalid_indicator():
 
     assert not i.valid_values()
 
-    i = Indicator("and", frozenset({RiskRelation(5, 5), RiskRelation(3, -1)}))
+    i = Indicator("and", frozenset({RiskRelation("five", "five"), RiskRelation("three", "indicator")}))
 
     assert not i.valid_values()
 
 
 def test_valid_indicator():
 
-    i = Indicator("and", frozenset({RiskRelation(5, -1), RiskRelation(3, -1), RiskRelation(4, -1)}))
+    i = Indicator("and", frozenset({RiskRelation("five", "indicator"),
+                                    RiskRelation("three", "indicator"),
+                                    RiskRelation("four", "indicator")}))
 
     assert i.valid_values()
 

@@ -10,7 +10,7 @@ def birnbaum_structural_importance(sg: SystemGraph, ignore_suppliers=True):
     all_ids.update({s.identifier for s in sg.suppliers})
 
     x = {i: 0.5 for i in all_ids}
-    x[-1] = 0  # indicator, manual, should always be zero
+    x["indicator"] = 0  # indicator, manual, should always be zero
 
     return birnbaum_importance(sg, x, ignore_suppliers)
 

@@ -1,79 +1,43 @@
+from collections import defaultdict
+
 from iscram.domain.metrics.graph_functions import (
-    get_tree_boolean_function_lambda, get_graph_dicts_from_system_graph
+    get_tree_boolean_function_lambda, prep_for_mocus
 )
 
-from iscram.domain.model import (
-    SystemGraph, Component, Indicator, RiskRelation
-)
+from iscram.domain.model import SystemGraph
 
 
-def test_build_simple_logic_and():
-    components = frozenset({Component(1, "one", "and"), Component(2, "two", "and"), Component(3, "three", "and")})
-
-    indicator = Indicator("and", frozenset({RiskRelation(3, -1)}))
-
-    deps = frozenset({RiskRelation(1, 3), RiskRelation(2, 3)})
-
-    sg = SystemGraph("simple", components, frozenset(), deps, frozenset(), indicator)
-
-    graph, logic = get_graph_dicts_from_system_graph(sg, ignore_suppliers=True)
-
-    fn = get_tree_boolean_function_lambda(-1, graph, logic)
-
-    x = {-1: False, 1: True, 2: True, 3: True}
-    expected = True
-    assert fn(x) == expected
-
-    x = {-1: False, 1: False, 2: False, 3: True}
-    expected = True
-    assert fn(x) == expected
-
-    x = {-1: False, 1: True, 2: True, 3: False}
-    expected = True
-    assert fn(x) == expected
-
-    x = {-1: False, 1: False, 2: True, 3: False}
-    expected = False
-    assert fn(x) == expected
-
-    x = {-1: False, 1: True, 2: False, 3: False}
-    expected = False
-    assert fn(x) == expected
+x_all = [
+    {"indicator": False, "one": True, "two": True, "three": True},
+    {"indicator": False, "one": False, "two": False, "three": True},
+    {"indicator": False, "one": False, "two": True, "three": False},
+    {"indicator": False, "one": True, "two": False, "three": False},
+    {"indicator": False, "one": True, "two": True, "three": False},
+    {"indicator": False, "one": False, "two": False, "three": False}
+]
 
 
-def test_build_simple_logic_or():
-    components = frozenset({Component(1, "one", "and"), Component(2, "two", "and"), Component(3, "three", "or")})
+def test_build_simple_logic_and(simple_and: SystemGraph):
+    graph, logic = prep_for_mocus(simple_and, ignore_suppliers=True)
+    fn = get_tree_boolean_function_lambda("indicator", graph, logic)
 
-    indicator = Indicator("and", frozenset({RiskRelation(3, -1)}))
+    expected_x_and = [True, True, False, False, True, False]
 
-    deps = frozenset({RiskRelation(1, 3), RiskRelation(2, 3)})
+    for x, expected in zip(x_all, expected_x_and):
+        y = defaultdict(lambda: False)
+        y.update(x)
 
-    sg = SystemGraph("simple", components, frozenset(), deps, frozenset(), indicator)
+        assert fn(y) == expected
 
-    graph, logic = get_graph_dicts_from_system_graph(sg, ignore_suppliers=True)
 
-    fn = get_tree_boolean_function_lambda(-1, graph, logic)
+def test_build_simple_logic_or(simple_or):
+    graph, logic = prep_for_mocus(simple_or, ignore_suppliers=True)
 
-    x = {-1: False, 1: True, 2: True, 3: True}
-    expected = True
-    assert fn(x) == expected
+    fn = get_tree_boolean_function_lambda("indicator", graph, logic)
 
-    x = {-1: False, 1: False, 2: False, 3: True}
-    expected = True
-    assert fn(x) == expected
+    expected_x_or = [True, True, True, True, True, False]
 
-    x = {-1: False, 1: True, 2: True, 3: False}
-    expected = True
-    assert fn(x) == expected
-
-    x = {-1: False, 1: False, 2: True, 3: False}
-    expected = True
-    assert fn(x) == expected
-
-    x = {-1: False, 1: True, 2: False, 3: False}
-    expected = True
-    assert fn(x) == expected
-
-    x = {-1: False, 1: False, 2: False, 3: False}
-    expected = False
-    assert fn(x) == expected
+    for x, expected in zip(x_all, expected_x_or):
+        y = defaultdict(lambda: False)
+        y.update(x)
+        assert fn(y) == expected

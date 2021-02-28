@@ -1,9 +1,9 @@
 from typing import FrozenSet, List, Set, Dict
-from collections import Counter
+from collections import defaultdict
 
 from iscram.domain.model import SystemGraph
 from iscram.domain.metrics.graph_functions import (
-    get_graph_dicts_from_system_graph, get_tree_boolean_function_lambda,
+    prep_for_mocus, get_tree_boolean_function_lambda,
     enumerate_all_combinations
 )
 
@@ -12,33 +12,39 @@ class MOCUSError(RuntimeError):
     pass
 
 
-def find_minimal_cutsets(sg: SystemGraph, ignore_suppliers=True) -> FrozenSet[FrozenSet[int]]:
+def find_minimal_cutsets(sg: SystemGraph, ignore_suppliers=True) -> FrozenSet[FrozenSet[str]]:
     return mocus(sg, ignore_suppliers)
 
 
-def mocus(sg: SystemGraph, ignore_suppliers=True) -> FrozenSet[FrozenSet[int]]:
+def mocus(sg: SystemGraph, ignore_suppliers=True) -> FrozenSet[FrozenSet[str]]:
     """ Something should be said to note that the input graph differs from
         a traditional fault-tree. Specifically, all nodes here are both events and logic gates.
         So strictly this is a MOCUS-like algorithm.
     """
     # Risk metrics are undefined when multiple suppliers of a component are included.
     # Therefore, mocus should not be called in such cases.
+
     if not ignore_suppliers:
-        offering_counter = Counter(map(lambda of: of.component_id, sg.offerings))
-        if any(map(lambda cm: offering_counter[cm] > 1, offering_counter.elements())):
-            raise MOCUSError
+        pass
+        ## replace this check with a similar check
+        ### that asserts only one supplier is a risk_src for a given component
+        # offering_counter = Counter(map(lambda of: of.component_id, sg.offerings))
+        # if any(map(lambda cm: offering_counter[cm] > 1, offering_counter.elements())):
+        #     raise MOCUSError
 
-    graph, logic = get_graph_dicts_from_system_graph(sg, ignore_suppliers)
+    graph, logic = prep_for_mocus(sg, ignore_suppliers)
 
-    working_result = [{-1}]
-    recursive_mocus(-1, graph, logic, working_result)
+    working_result = [{"indicator"}]
+    recursive_mocus("indicator", graph, logic, working_result)
     # The indicator should be removed from the cutsets since it is not a component or supplier
-    working_result.remove({-1})
+    working_result.remove({"indicator"})
 
-    return minimize_cutsets([frozenset(cutset) for cutset in working_result])
+    working_result = minimize_cutsets([frozenset(cutset) for cutset in working_result])
+
+    return remove_fictive_gate_cutsets(working_result)
 
 
-def recursive_mocus(n: int, graph: Dict, logic: Dict, cutsets: List[Set]) -> None:
+def recursive_mocus(n: str, graph: Dict, logic: Dict, cutsets: List[Set]) -> None:
     children = graph.get(n, None)
     if not children or len(children) == 0:
         return
@@ -75,19 +81,50 @@ def recursive_mocus(n: int, graph: Dict, logic: Dict, cutsets: List[Set]) -> Non
     for child in children:
         recursive_mocus(child, graph, logic, cutsets)
 
+#
+# def explore_non_basic_event_effects():
+#     from collections import defaultdict
+#     logic = defaultdict(lambda: "and")
+#     main_gates = ["1-m", "2-m", "3-m", "4-m"]
+#     dep_gates = ["1-d", "2-d", "3-d", "4-d"]
+#     for m in main_gates:
+#         logic[m] = "or"
+#
+#     graph = {
+#         "i" : ["1-m"],
+#         "1-m" : ["1-b", "1-s", "1-d"],
+#         "2-m" : ["2-b", "2-s", "2-d"],
+#         "3-m" : ["3-b", "3-s", "3-d"],
+#         "4-m" : ["4-b", "4-s", "4-d"],
+#         "1-d" : ["2-m", "3-m"],
+#         "2-d" : ["4-m"],
+#         "3-d" : ["4-m"],
+#         "1-s" : ["x"],
+#         "2-s" : ["x"],
+#         "3-s" : ["x"],
+#         "4-s" : ["x"]
+#     }
+#     cutsets = [{"i"}]
+#
+#     recursive_mocus("i", graph, logic, cutsets)
+#
+#     cutsets.remove({"i"})
+#     return cutsets
 
-def brute_force_find_cutsets(sg: SystemGraph) -> FrozenSet[FrozenSet[int]]:
+
+def brute_force_find_cutsets(sg: SystemGraph) -> FrozenSet[FrozenSet[str]]:
     """ This is brute force and infeasible for even moderate graphs,
     but useful to check methods on small examples """
 
-    graph, logic = get_graph_dicts_from_system_graph(sg, ignore_suppliers=True)
-    indicator_fn = get_tree_boolean_function_lambda(-1, graph, logic)
+    graph, logic = prep_for_mocus(sg, ignore_suppliers=True)
+    indicator_fn = get_tree_boolean_function_lambda("indicator", graph, logic)
 
     component_ids = {c.identifier for c in sg.components}
 
     temporary_results = []
-    x_template = {n: False for n in component_ids}
-    x_template[-1] = False  # indicator, always false manually
+    x_template = defaultdict(lambda: False)
+    x_template.update({n: False for n in component_ids})
+    x_template["indicator"] = False  # indicator, always false manually
 
     for true_nodes in enumerate_all_combinations(component_ids):
         true_nodes = frozenset(true_nodes)
@@ -101,7 +138,7 @@ def brute_force_find_cutsets(sg: SystemGraph) -> FrozenSet[FrozenSet[int]]:
     return minimize_cutsets(temporary_results)
 
 
-def minimize_cutsets(cutsets: List[FrozenSet]) -> FrozenSet[FrozenSet[int]]:
+def minimize_cutsets(cutsets: List[FrozenSet]) -> FrozenSet[FrozenSet[str]]:
     sorted_temp_results = sorted(cutsets, key=lambda r: len(r))
     try:
         result = [sorted_temp_results[0]]
@@ -119,6 +156,18 @@ def minimize_cutsets(cutsets: List[FrozenSet]) -> FrozenSet[FrozenSet[int]]:
             result.append(possible)
 
     return frozenset(result)
+
+
+def is_fictive(node):
+    return node[0] == "@"
+
+
+def remove_fictive_gate_cutsets(cutsets):
+    def no_fictive(cutset):
+        return not any([is_fictive(node) for node in cutset])
+
+    return frozenset(list(filter(no_fictive, cutsets)))
+
 
 ## TODO: supplier only cutsets; combine with supplier-excluded cutsets
 # old code that does some of that below

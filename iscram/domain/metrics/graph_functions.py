@@ -9,7 +9,7 @@ fmt_logic = {"lambda": "lambda x: {}",
              "or": "any",
              "begin": "([",
              "end": "])",
-             "x": "x[{}]",
+             "x": "x[\"{}\"]",
              "sep": ", "}
 
 fmt_prob = {"lambda": "lambda x: {}",
@@ -17,7 +17,7 @@ fmt_prob = {"lambda": "lambda x: {}",
             "or": "probability_union",
             "begin": "([",
             "end": "])",
-            "x": "x[{}]",
+            "x": "x[\"{}\"]",
             "sep": ", "}
 
 
@@ -82,32 +82,52 @@ def is_tree(graph, root) -> bool:
     return len(visited) == len(nodes)
 
 
-def get_graph_dicts_from_system_graph(sg: SystemGraph, ignore_suppliers):
-    logic = {-1: sg.indicator.logic_function}
+def prep_for_mocus(sg: SystemGraph, ignore_suppliers):
+    logic = {"indicator": sg.indicator.logic_function}
+
+    sg_suppliers = set([s.identifier for s in sg.suppliers])
 
     for c in sg.components:
-        logic[c.identifier] = c.logic_function
+        logic["@deps_"+c.identifier] = c.logic_function
+        logic["@main_"+c.identifier] = "or"
+        logic[c.identifier] = "and"
 
-    graph = {-1: set([d.risk_src_id for d in sg.indicator.dependencies])}
+    graph = {"indicator": set(["@main_"+d.risk_src_id for d in sg.indicator.dependencies])}
 
     for d in sg.security_dependencies:
-        # all dependencies can be added b/c without 'offerings' as links to suppliers,
-        # recursion will not reach to supplier nodes.
-        adj = graph.get(d.risk_dst_id, set())
-        adj.add(d.risk_src_id)
-        graph[d.risk_dst_id] = adj
+        src_is_supplier = d.risk_src_id in sg_suppliers
+        dst_is_supplier = d.risk_dst_id in sg_suppliers
+
+        if dst_is_supplier:
+            dst_name = d.risk_dst_id
+        else:
+            dst_name = "@deps_" + d.risk_dst_id
+
+        if src_is_supplier:
+            src_name = d.risk_src_id
+        else:
+            src_name = "@main_" + d.risk_src_id
+
+        if src_is_supplier and not dst_is_supplier:
+            dst_name = "@main_" + d.risk_dst_id
+
+        if ignore_suppliers and (src_is_supplier or dst_is_supplier):
+            pass
+        else:
+            adj = graph.get(dst_name, set())
+            adj.add(src_name)
+            graph[dst_name] = adj
+
+    for c in sg.components:
+        adj = graph.get("@main_"+c.identifier, set())
+        adj.add(c.identifier)
+        adj.add("@deps_"+c.identifier)
+        graph["@main_"+c.identifier] = adj
+
 
     if not ignore_suppliers:
         for s in sg.suppliers:
             logic[s.identifier] = "and"
-
-        for o in sg.offerings:
-            adj = graph.get(o.component_id, set())
-            adj.add(o.supplier_id)
-            graph[o.component_id] = adj
-
-    # if not is_tree(graph, -1):
-    #     raise TreeError
 
     return graph, logic
 

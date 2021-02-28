@@ -3,8 +3,15 @@ from typing import FrozenSet
 
 from pydantic.dataclasses import dataclass
 
-def validate_name(name: str) -> bool:
-    return len(name) > 0
+RESTRICTED_IDENTIFIER_CHARS = {"!", "@", "#", "$", "%", "^", "&", "*"}
+
+
+def validate_identifier(identifier: str) -> bool:
+    if len(identifier) == 0:
+        return False
+    if identifier == "indicator":
+        return False
+    return not identifier[0] in RESTRICTED_IDENTIFIER_CHARS
 
 
 def validate_logic_function(logic_function: str) -> bool:
@@ -21,14 +28,13 @@ def validate_cost(cost: int) -> bool:
 
 @dataclass(frozen=True)
 class Component:
-    identifier: int
-    name: str
+    identifier: str
     logic_function: str = "and"
     risk: float = 0.0
     cost: int = 0
 
     def valid_values(self):
-        return all([validate_name(self.name),
+        return all([validate_identifier(self.identifier),
                     validate_logic_function(self.logic_function),
                     validate_risk(self.risk),
                     validate_cost(self.cost)])
@@ -36,19 +42,18 @@ class Component:
 
 @dataclass(frozen=True)
 class Supplier:
-    identifier: int
-    name: str
+    identifier: str
     trust: float = 1.0
 
     def valid_values(self):
-        return all([validate_name(self.name),
+        return all([validate_identifier(self.identifier),
                     validate_risk(self.trust)])
 
 
 @dataclass(frozen=True)
 class Offering:
-    supplier_id: int
-    component_id: int
+    supplier_id: str
+    component_id: str
     risk: float
     cost: int
 
@@ -60,8 +65,8 @@ class Offering:
 
 @dataclass(frozen=True)
 class RiskRelation:
-    risk_src_id: int
-    risk_dst_id: int
+    risk_src_id: str
+    risk_dst_id: str
 
 
 @dataclass(frozen=True)
@@ -70,7 +75,7 @@ class Indicator:
     dependencies: FrozenSet[RiskRelation] = field(default_factory=set)
 
     def valid_values(self):
-        return all([all([d.risk_dst_id == -1 for d in self.dependencies]),
+        return all([all([d.risk_dst_id == "indicator" for d in self.dependencies]),
                     validate_logic_function(self.logic_function)])
 
 
@@ -84,8 +89,7 @@ class SystemGraph:
     indicator: Indicator
 
     def valid_values(self):
-        parts = all([validate_name(self.name),
-                     all([c.valid_values() for c in self.components]),
+        parts = all([all([c.valid_values() for c in self.components]),
                      all([s.valid_values() for s in self.suppliers]),
                      all([o.valid_values() for o in self.offerings]),
                      ])

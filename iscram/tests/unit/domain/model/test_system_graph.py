@@ -11,15 +11,15 @@ def test_empty_sg():
 
 
 def test_full_sg():
-    components = frozenset([Component(i, "name") for i in range(10)])
+    components = frozenset([Component(str(i)) for i in range(10)])
 
-    suppliers = frozenset([Supplier(i, "name") for i in range(10, 20)])
+    suppliers = frozenset([Supplier(str(i)) for i in range(10, 20)])
 
-    indicator = Indicator("and", frozenset([RiskRelation(i, -1) for i in {1, 2, 3}]))
+    indicator = Indicator("and", frozenset([RiskRelation(str(i), "indicator") for i in {1, 2, 3}]))
 
-    offerings = frozenset({Offering(15, 5, 0.5, 30), Offering(16, 5, 0.5, 30), Offering(17, 3, 0.5, 30)})
+    offerings = frozenset({Offering("15", "5", 0.5, 30), Offering("16", "5", 0.5, 30), Offering("17", "3", 0.5, 30)})
 
-    deps = frozenset({RiskRelation(1, 3), RiskRelation(2, 3), RiskRelation(5, 6)})
+    deps = frozenset({RiskRelation("1", "3"), RiskRelation("2", "3"), RiskRelation("5", "6")})
 
     sg = SystemGraph("test", components, suppliers, deps, offerings, indicator)
 
@@ -27,15 +27,15 @@ def test_full_sg():
 
 
 def test_mismatched_indicator():
-    components = frozenset([Component(i, "name") for i in range(10)])
+    components = frozenset([Component(str(i)) for i in range(10)])
 
-    suppliers = frozenset([Supplier(i, "name") for i in range(10, 20)])
+    suppliers = frozenset([Supplier(str(i)) for i in range(10, 20)])
 
-    indicator = Indicator("and", frozenset([RiskRelation(i, -1) for i in {10, 15, 35}]))
+    indicator = Indicator("and", frozenset([RiskRelation(str(i), "indicator") for i in {10, 15, 35}]))
 
-    offerings = frozenset({Offering(15, 5, 0.5, 30), Offering(16, 5, 0.5, 30), Offering(17, 3, 0.5, 30)})
+    offerings = frozenset({Offering("15", "5", 0.5, 30), Offering("16", "5", 0.5, 30), Offering("17", "3", 0.5, 30)})
 
-    deps = frozenset({RiskRelation(1, 3), RiskRelation(2, 3), RiskRelation(5, 6)})
+    deps = frozenset({RiskRelation("1", "3"), RiskRelation("2", "3"), RiskRelation("5", "6")})
 
     sg = SystemGraph("test", components, suppliers, deps, offerings, indicator)
 
@@ -43,15 +43,15 @@ def test_mismatched_indicator():
 
 
 def test_mismatched_offerings():
-    components = frozenset([Component(i, "name") for i in range(10)])
+    components = frozenset([Component(str(i)) for i in range(10)])
 
-    suppliers = frozenset([Supplier(i, "name") for i in range(10, 20)])
+    suppliers = frozenset([Supplier(str(i)) for i in range(10, 20)])
 
-    indicator = Indicator("and", frozenset([RiskRelation(i, -1) for i in {1, 2, 3}]))
+    indicator = Indicator("and", frozenset([RiskRelation(str(i), "indicator") for i in {1, 2, 3}]))
 
-    offerings = frozenset({Offering(15, 300, 0.5, 30), Offering(413, 5, 0.5, 30), Offering(17, 3, 0.5, 30)})
+    offerings = frozenset({Offering("15", "300", 0.5, 30), Offering("413", "5", 0.5, 30), Offering("17", "3", 0.5, 30)})
 
-    deps = frozenset({RiskRelation(1, 3), RiskRelation(2, 3), RiskRelation(5, 6)})
+    deps = frozenset({RiskRelation("1", "3"), RiskRelation("2", "3"), RiskRelation("5", "6")})
 
     sg = SystemGraph("test", components, suppliers, deps, offerings, indicator)
 
@@ -59,15 +59,15 @@ def test_mismatched_offerings():
 
 
 def test_mismatched_deps():
-    components = frozenset([Component(i, "name") for i in range(10)])
+    components = frozenset([Component(str(i)) for i in range(10)])
 
-    suppliers = frozenset([Supplier(i, "name") for i in range(10, 20)])
+    suppliers = frozenset([Supplier(str(i)) for i in range(10, 20)])
 
-    indicator = Indicator("and", frozenset([RiskRelation(i, -1) for i in {1, 2, 3}]))
+    indicator = Indicator("and", frozenset([RiskRelation(str(i), "indicator") for i in {1, 2, 3}]))
 
-    offerings = frozenset({Offering(15, 5, 0.5, 30), Offering(16, 5, 0.5, 30), Offering(17, 3, 0.5, 30)})
+    offerings = frozenset({Offering("15", "5", 0.5, 30), Offering("16", "5", 0.5, 30), Offering("17", "3", 0.5, 30)})
 
-    deps = frozenset({RiskRelation(100, 3), RiskRelation(23, 3), RiskRelation(5, 6)})
+    deps = frozenset({RiskRelation("100", "3"), RiskRelation("23", "3"), RiskRelation("5", "6")})
 
     sg = SystemGraph("test", components, suppliers, deps, offerings, indicator)
 
@@ -75,15 +75,15 @@ def test_mismatched_deps():
 
 
 def test_overlapping_ids():
-    components = frozenset([Component(i, "name") for i in range(10)])
+    components = frozenset([Component(str(i)) for i in range(10)])
 
-    suppliers = frozenset([Supplier(i, "name") for i in range(15)])
+    suppliers = frozenset([Supplier(str(i)) for i in range(15)])
 
-    indicator = Indicator("and", frozenset([RiskRelation(i, -1) for i in {1, 2, 3}]))
+    indicator = Indicator("and", frozenset([RiskRelation(str(i), "indicator") for i in {1, 2, 3}]))
 
-    offerings = frozenset({Offering(12, 5, 0.5, 30), Offering(11, 5, 0.5, 30), Offering(12, 3, 0.5, 30)})
+    offerings = frozenset({Offering("15", "5", 0.5, 30), Offering("16", "5", 0.5, 30), Offering("17", "3", 0.5, 30)})
 
-    deps = frozenset({RiskRelation(1, 3), RiskRelation(2, 3), RiskRelation(5, 6)})
+    deps = frozenset({RiskRelation("1", "3"), RiskRelation("2", "3"), RiskRelation("5", "6")})
 
     sg = SystemGraph("test", components, suppliers, deps, offerings, indicator)
 
@@ -91,19 +91,19 @@ def test_overlapping_ids():
 
 
 def test_internally_overlapping_ids():
-    components = set([Component(i, "name") for i in range(10)])
+    components = set([Component(str(i)) for i in range(10)])
 
-    components.add(Component(3, "test"))
+    components.add(Component(str(3), risk=0.4342))
 
     components = frozenset(components)
 
-    suppliers = frozenset([Supplier(i, "name") for i in range(10, 20)])
+    suppliers = frozenset([Supplier(str(i)) for i in range(10, 20)])
 
-    indicator = Indicator("and", frozenset([RiskRelation(i, -1) for i in {1, 2, 3}]))
+    indicator = Indicator("and", frozenset([RiskRelation(str(i), "indicator") for i in {1, 2, 3}]))
 
-    offerings = frozenset({Offering(12, 5, 0.5, 30), Offering(11, 5, 0.5, 30), Offering(12, 3, 0.5, 30)})
+    offerings = frozenset({Offering("15", "5", 0.5, 30), Offering("16", "5", 0.5, 30), Offering("17", "3", 0.5, 30)})
 
-    deps = frozenset({RiskRelation(1, 3), RiskRelation(2, 3), RiskRelation(5, 6)})
+    deps = frozenset({RiskRelation("1", "3"), RiskRelation("2", "3"), RiskRelation("5", "6")})
 
     sg = SystemGraph("test", components, suppliers, deps, offerings, indicator)
 
@@ -111,27 +111,27 @@ def test_internally_overlapping_ids():
 
 
 def test_hash_equal():
-    components = frozenset([Component(i, "name") for i in range(10)])
+    components = frozenset([Component(str(i)) for i in range(10)])
 
-    suppliers = frozenset([Supplier(i, "name") for i in range(10, 20)])
+    suppliers = frozenset([Supplier(str(i)) for i in range(10, 20)])
 
-    indicator = Indicator("and", frozenset([RiskRelation(i, -1) for i in {1, 2, 3}]))
+    indicator = Indicator("and", frozenset([RiskRelation(str(i), "indicator") for i in {1, 2, 3}]))
 
-    offerings = frozenset({Offering(15, 5, 0.5, 30), Offering(16, 5, 0.5, 30), Offering(17, 3, 0.5, 30)})
+    offerings = frozenset({Offering("15", "5", 0.5, 30), Offering("16", "5", 0.5, 30), Offering("17", "3", 0.5, 30)})
 
-    deps = frozenset({RiskRelation(1, 3), RiskRelation(2, 3), RiskRelation(5, 6)})
+    deps = frozenset({RiskRelation("1", "3"), RiskRelation("2", "3"), RiskRelation("5", "6")})
 
     sg = SystemGraph("test", components, suppliers, deps, offerings, indicator)
 
-    components_2 = frozenset([Component(i, "name") for i in range(10)])
+    components_2 = frozenset([Component(str(i)) for i in range(10)])
 
-    suppliers_2 = frozenset([Supplier(i, "name") for i in range(10, 20)])
+    suppliers_2 = frozenset([Supplier(str(i)) for i in range(10, 20)])
 
-    indicator_2 = Indicator("and", frozenset([RiskRelation(i, -1) for i in {1, 2, 3}]))
+    indicator_2 = Indicator("and", frozenset([RiskRelation(str(i), "indicator") for i in {1, 2, 3}]))
 
-    offerings_2 = frozenset({Offering(15, 5, 0.5, 30), Offering(16, 5, 0.5, 30), Offering(17, 3, 0.5, 30)})
+    offerings_2 = frozenset({Offering("15", "5", 0.5, 30), Offering("16", "5", 0.5, 30), Offering("17", "3", 0.5, 30)})
 
-    deps_2 = frozenset({RiskRelation(1, 3), RiskRelation(2, 3), RiskRelation(5, 6)})
+    deps_2 = frozenset({RiskRelation("1", "3"), RiskRelation("2", "3"), RiskRelation("5", "6")})
 
     sg_2 = SystemGraph("test", components_2, suppliers_2, deps_2, offerings_2, indicator_2)
 
@@ -140,27 +140,27 @@ def test_hash_equal():
 
 
 def test_hash_not_equal():
-    components = frozenset([Component(i, "name") for i in range(10)])
+    components = frozenset([Component(str(i)) for i in range(10)])
 
-    suppliers = frozenset([Supplier(i, "name") for i in range(10, 20)])
+    suppliers = frozenset([Supplier(str(i)) for i in range(10, 20)])
 
-    indicator = Indicator("and", frozenset([RiskRelation(i, -1) for i in {1, 2, 3}]))
+    indicator = Indicator("and", frozenset([RiskRelation(str(i), "indicator") for i in {1, 2, 3}]))
 
-    offerings = frozenset({Offering(15, 5, 0.5, 30), Offering(16, 5, 0.5, 30), Offering(17, 3, 0.5, 30)})
+    offerings = frozenset({Offering("15", "5", 0.5, 30), Offering("16", "5", 0.5, 30), Offering("17", "3", 0.5, 30)})
 
-    deps = frozenset({RiskRelation(1, 3), RiskRelation(2, 3), RiskRelation(5, 6)})
+    deps = frozenset({RiskRelation("1", "3"), RiskRelation("2", "3"), RiskRelation("5", "6")})
 
     sg = SystemGraph("test", components, suppliers, deps, offerings, indicator)
 
-    components_2 = frozenset([Component(i, "name") for i in range(10)])
+    components_2 = frozenset([Component(str(i)) for i in range(10)])
 
-    suppliers_2 = frozenset([Supplier(i, "name") for i in range(10, 20)])
+    suppliers_2 = frozenset([Supplier(str(i)) for i in range(10, 20)])
 
-    indicator_2 = Indicator("and", frozenset([RiskRelation(i, -1) for i in {1, 2, 3}]))
+    indicator_2 = Indicator("and", frozenset([RiskRelation(str(i), "indicator") for i in {1, 2, 3}]))
 
-    offerings_2 = frozenset({Offering(15, 5, 0.49999, 30), Offering(16, 5, 0.5, 30), Offering(17, 3, 0.5, 30)})
+    offerings_2 = frozenset({Offering("15", "5", 0.49, 30), Offering("16", "5", 0.5, 30), Offering("17", "3", 0.5, 30)})
 
-    deps_2 = frozenset({RiskRelation(1, 3), RiskRelation(2, 3), RiskRelation(5, 6)})
+    deps_2 = frozenset({RiskRelation("1", "3"), RiskRelation("2", "3"), RiskRelation("5", "6")})
 
     sg_2 = SystemGraph("test", components_2, suppliers_2, deps_2, offerings_2, indicator_2)
 
