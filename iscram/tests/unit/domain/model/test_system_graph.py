@@ -1,6 +1,6 @@
 from iscram.domain.model import (
     Component, Supplier, Indicator, RiskRelation,
-    Offering, SystemGraph
+    Offering, SystemGraph, apply_singular_offerings
 )
 
 
@@ -228,3 +228,21 @@ def test_structure_unequal():
     assert sg != sg_2
     assert hash(sg) != hash(sg_2)
     assert sg.structure() != sg_2.structure()
+
+
+def test_apply_singular_offerings_basic(simple_and_suppliers: SystemGraph):
+    assert simple_and_suppliers.valid_values()
+
+    dep_count = len(simple_and_suppliers.security_dependencies)
+
+    updated = apply_singular_offerings(simple_and_suppliers)
+
+    assert updated.valid_values()
+
+    updated_dep_count = len(updated.security_dependencies)
+
+    assert dep_count + 3 == updated_dep_count
+
+    c_1 = list(filter(lambda c: c.identifier == "one", updated.components))[0]
+
+    assert c_1.risk == 0.25

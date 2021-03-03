@@ -83,16 +83,21 @@ def is_tree(graph, root) -> bool:
 
 
 def prep_for_mocus(sg: SystemGraph, ignore_suppliers):
+    # note, test cases all pass after combining the "@main" node with the basic event node.
+    # original @main code in comments
+
     logic = {"indicator": sg.indicator.logic_function}
 
     sg_suppliers = set([s.identifier for s in sg.suppliers])
 
     for c in sg.components:
         logic["@deps_"+c.identifier] = c.logic_function
-        logic["@main_"+c.identifier] = "or"
-        logic[c.identifier] = "and"
+        logic[c.identifier] = "or"
+        #logic["@main_"+c.identifier] = "or"
+        #logic[c.identifier] = "and"
 
-    graph = {"indicator": set(["@main_"+d.risk_src_id for d in sg.indicator.dependencies])}
+    #graph = {"indicator": set(["@main_"+d.risk_src_id for d in sg.indicator.dependencies])}
+    graph = {"indicator": set([d.risk_src_id for d in sg.indicator.dependencies])}
 
     for d in sg.security_dependencies:
         src_is_supplier = d.risk_src_id in sg_suppliers
@@ -106,10 +111,12 @@ def prep_for_mocus(sg: SystemGraph, ignore_suppliers):
         if src_is_supplier:
             src_name = d.risk_src_id
         else:
-            src_name = "@main_" + d.risk_src_id
+            src_name = d.risk_src_id
+            #src_name = "@main_" + d.risk_src_id
 
         if src_is_supplier and not dst_is_supplier:
-            dst_name = "@main_" + d.risk_dst_id
+            #dst_name = "@main_" + d.risk_dst_id
+            dst_name = d.risk_dst_id
 
         if ignore_suppliers and (src_is_supplier or dst_is_supplier):
             pass
@@ -119,11 +126,12 @@ def prep_for_mocus(sg: SystemGraph, ignore_suppliers):
             graph[dst_name] = adj
 
     for c in sg.components:
-        adj = graph.get("@main_"+c.identifier, set())
-        adj.add(c.identifier)
+       # adj = graph.get("@main_"+c.identifier, set())
+        adj = graph.get(c.identifier, set())
+        #adj.add(c.identifier)
         adj.add("@deps_"+c.identifier)
-        graph["@main_"+c.identifier] = adj
-
+        #graph["@main_"+c.identifier] = adj
+        graph[c.identifier] = adj
 
     if not ignore_suppliers:
         for s in sg.suppliers:

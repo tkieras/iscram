@@ -1,5 +1,7 @@
 from typing import FrozenSet, List, Set, Dict
-from collections import defaultdict
+from collections import defaultdict, deque
+
+import numpy as np
 
 from iscram.domain.model import SystemGraph
 from iscram.domain.metrics.graph_functions import (
@@ -34,8 +36,8 @@ def mocus(sg: SystemGraph, ignore_suppliers=True) -> FrozenSet[FrozenSet[str]]:
 
     graph, logic = prep_for_mocus(sg, ignore_suppliers)
 
-    working_result = [{"indicator"}]
-    recursive_mocus("indicator", graph, logic, working_result)
+    working_result = iterative_mocus("indicator", graph, logic)
+
     # The indicator should be removed from the cutsets since it is not a component or supplier
     working_result.remove({"indicator"})
 
@@ -44,72 +46,66 @@ def mocus(sg: SystemGraph, ignore_suppliers=True) -> FrozenSet[FrozenSet[str]]:
     return remove_fictive_gate_cutsets(working_result)
 
 
-def recursive_mocus(n: str, graph: Dict, logic: Dict, cutsets: List[Set]) -> None:
-    children = graph.get(n, None)
-    if not children or len(children) == 0:
-        return
+def iterative_mocus(n: str, graph: Dict, logic: Dict) -> List[Set]:
+    queue = deque([n])
 
-    # pseudocode for MOCUS
-    # let n be current working node
-    # let c be predecessors(children) of n
+    all_names = set()
+    for node, children in graph.items():
+        all_names.add(node)
+        all_names.update(children)
 
-    # if n is "and" then
-    #   for each cutset including n
-    #   add additional cutset without n but with c instead
-    # if n is "or" then
-    #   for each cutset including n
-    #   for each child C in c
-    # add additional cutset without n but with C instead
+    for node in logic.keys():
+        all_names.add(node)
 
-    n_involved = filter(lambda x: n in x, cutsets)
-    tmp = []
+    all_names = sorted(list(all_names))
 
-    if logic[n] == "and":
-        for cutset in n_involved:
-            new_cutset = cutset - {n}
-            new_cutset.update(children)
-            tmp.append(new_cutset)
-        cutsets.extend(tmp)
-    elif logic[n] == "or":
-        for cutset in n_involved:
-            for child in children:
-                new_cutset = cutset - {n}
-                new_cutset.add(child)
+    index_to_name = {}
+    name_to_index = {}
+
+    for idx, name in enumerate(all_names):
+        index_to_name[idx] = name
+        name_to_index[name] = idx
+
+    root_cutset = np.zeros((len(all_names),1), dtype=bool)
+    root_cutset[name_to_index["indicator"]] = True
+    cutsets = [root_cutset]
+
+    while queue:
+        v = queue.pop()
+        children = graph.get(v, None)
+
+        if not children or len(children) == 0:
+            continue
+
+        v_involved = filter(lambda ct: ct[name_to_index[v]], cutsets)
+        tmp = []
+
+        if logic[v] == "and":
+            for cutset in v_involved:
+                new_cutset = np.array(cutset, dtype=bool)
+                new_cutset[name_to_index[v]] = False
+                for c in children:
+                    new_cutset[name_to_index[c]] = True
                 tmp.append(new_cutset)
+        elif logic[v] == "or":
+            for cutset in v_involved:
+                for child in children:
+                    new_cutset = np.array(cutset, dtype=bool)
+                    new_cutset[name_to_index[v]] = False
+                    new_cutset[name_to_index[child]] = True
+                    tmp.append(new_cutset)
+
         cutsets.extend(tmp)
+        debug_cutset_count = len(cutsets)
 
-    for child in children:
-        recursive_mocus(child, graph, logic, cutsets)
+        for child in children:
+            queue.appendleft(child)
 
-#
-# def explore_non_basic_event_effects():
-#     from collections import defaultdict
-#     logic = defaultdict(lambda: "and")
-#     main_gates = ["1-m", "2-m", "3-m", "4-m"]
-#     dep_gates = ["1-d", "2-d", "3-d", "4-d"]
-#     for m in main_gates:
-#         logic[m] = "or"
-#
-#     graph = {
-#         "i" : ["1-m"],
-#         "1-m" : ["1-b", "1-s", "1-d"],
-#         "2-m" : ["2-b", "2-s", "2-d"],
-#         "3-m" : ["3-b", "3-s", "3-d"],
-#         "4-m" : ["4-b", "4-s", "4-d"],
-#         "1-d" : ["2-m", "3-m"],
-#         "2-d" : ["4-m"],
-#         "3-d" : ["4-m"],
-#         "1-s" : ["x"],
-#         "2-s" : ["x"],
-#         "3-s" : ["x"],
-#         "4-s" : ["x"]
-#     }
-#     cutsets = [{"i"}]
-#
-#     recursive_mocus("i", graph, logic, cutsets)
-#
-#     cutsets.remove({"i"})
-#     return cutsets
+    cutsets = [set(np.nonzero(c)[0].tolist()) for c in cutsets]
+
+    cutsets = [set(list(map(lambda vidx: index_to_name[vidx], c))) for c in cutsets]
+
+    return cutsets
 
 
 def brute_force_find_cutsets(sg: SystemGraph) -> FrozenSet[FrozenSet[str]]:

@@ -1,0 +1,88 @@
+{
+  "components": [
+    {
+      "cost": 0,
+      "logic_function": "and",
+      "identifier": "three",
+      "risk": 0.0
+    },
+    {
+      "cost": 0,
+      "logic_function": "and",
+      "identifier": "two",
+      "risk": 0.0
+    },
+    {
+      "cost": 0,
+      "logic_function": "and",
+      "identifier": "one",
+      "risk": 0.0
+    }
+  ],
+  "indicator": {
+    "dependencies": [
+      {
+        "risk_dst_id": "indicator",
+        "risk_src_id": "three"
+      }
+    ],
+    "logic_function": "and"
+  },
+  "name": "simple",
+  "offerings": [
+    {
+      "supplier_id": "eleven",
+      "component_id": "one",
+      "risk": 0.25,
+      "cost": 0
+    },
+    {
+      "supplier_id": "twelve",
+      "component_id": "two",
+      "risk": 0.0,
+      "cost": 0
+    },
+    {
+      "supplier_id": "thirteen",
+      "component_id": "three",
+      "risk": 0.0,
+      "cost": 0
+    }
+  ],
+  "security_dependencies": [
+    {
+      "risk_dst_id": "three",
+      "risk_src_id": "two"
+    },
+    {
+      "risk_dst_id": "three",
+      "risk_src_id": "one"
+    }
+  ],
+  "suppliers": [
+    {
+      "identifier": "ten",
+      "trust": 0.75
+    },
+    {
+      "identifier": "eleven",
+      "trust": 1.0
+    },
+    {
+      "identifier": "twelve",
+      "trust": 1.0
+    },
+    {
+      "identifier": "thirteen",
+      "trust": 1.0
+    },
+    {
+      "identifier": "fourteen",
+      "trust": 1.0
+    },
+    {
+      "identifier": "fifteen",
+      "trust": 0.5
+    }
+  ]
+}

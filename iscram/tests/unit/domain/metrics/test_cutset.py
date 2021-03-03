@@ -212,13 +212,4 @@ def test_brute_force_cutsets_canonical(canonical: SystemGraph):
 
     assert cutsets == expected
 
-#
-# def test_explore_non_basic_events():
-#     result = explore_non_basic_event_effects()
-#
-#     result = minimize_cutsets([frozenset(cutset) for cutset in result])
-#
-#     result = remove_fictive_gate_cutsets(result)
-#     import pprint
-#
-#     pprint.pprint(result)
+

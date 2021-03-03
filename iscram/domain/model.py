@@ -127,3 +127,48 @@ class SystemGraph:
         structure = frozenset([tuple(entry) for entry in graph.values()])
 
         return hash(structure)
+
+
+def apply_singular_offerings(original: SystemGraph) -> SystemGraph:
+    offering_map = {}
+    for o in original.offerings:
+        offerings_for_component = offering_map.get(o.component_id, [])
+        offerings_for_component.append(o)
+        offering_map[o.component_id] = offerings_for_component
+
+    component_map = {}
+    for c in original.components:
+        component_map[c.identifier] = c
+
+    updated_dependencies = []
+    updated_components = []
+    old_components = set(original.components)
+
+    for component, offerings in offering_map.items():
+        if len(offerings) == 1:
+            offering = offerings[0]
+            old_component = component_map[component]
+            new_component = Component(component,
+                                      old_component.logic_function,
+                                      offering.risk,
+                                      offering.cost)
+            updated_components.append(new_component)
+            updated_dependencies.append(RiskRelation(offering.supplier_id, component))
+            old_components.remove(old_component)
+
+    # transfer unchanged components
+    for old_component in old_components:
+        updated_components.append(old_component)
+
+    updated_dependencies.extend(original.security_dependencies)
+
+    new_sg = SystemGraph(
+        original.name,
+        frozenset(updated_components),
+        original.suppliers,
+        frozenset(updated_dependencies),
+        original.offerings,
+        original.indicator
+    )
+
+    return new_sg

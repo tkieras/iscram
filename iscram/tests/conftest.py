@@ -3,7 +3,9 @@ import random
 
 import pytest
 
-from iscram.adapters.json import load_system_graph_json_str
+from iscram.adapters.json import load_system_graph_json_str, dump_system_graph_json_str
+
+from iscram.tests.unit.domain.model.gen_random_sg import gen_random_tree
 
 from iscram.domain.model import (
     SystemGraph, Component, RiskRelation, Indicator
@@ -39,41 +41,12 @@ def non_tree_simple_and():
 
 
 @pytest.fixture
+def simple_and_suppliers():
+    json_str = read_text("iscram.tests.system_graph_test_data", "simple_and_suppliers.json")
+
+    return load_system_graph_json_str(json_str)
+
+
+@pytest.fixture
 def rand_tree_sg():
-    def rand_logic():
-        return random.choice(["and", "or"])
-
-    def rand_risk():
-        return random.random()
-
-    def rand_cost():
-        return random.randint(0, 100)
-
-    n = 10
-    unused = [str(i) for i in range(1, n)]
-    random.shuffle(unused)
-
-    used = ["0"]
-    nodes = {"0"}
-    edges = set()
-
-    while unused:
-        child = unused.pop(0)
-        parent = random.choice(used)
-        nodes.add(child)
-        edges.add((child, parent))
-
-    nodes.remove("0")
-    ind_edges = list(filter(lambda e: e[1] == "0", edges))
-    for edge in ind_edges:
-        edges.remove(edge)
-
-    indicator = Indicator(rand_logic(), frozenset([RiskRelation(*edge) for edge in ind_edges]))
-
-    components = frozenset([Component(node, rand_logic(), rand_risk(), rand_cost()) for node in nodes])
-
-    deps = frozenset([RiskRelation(*edge) for edge in edges])
-
-    sg = SystemGraph("rand_tree", components, frozenset(), deps, frozenset(), indicator)
-
-    return sg
+    return gen_random_tree(10)
