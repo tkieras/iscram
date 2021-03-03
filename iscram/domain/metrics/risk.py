@@ -22,11 +22,12 @@ def probability_any_cutset(cutsets, x):
     return probability_union(probability_each_cutset)
 
 
-def risk_by_cutsets(sg: SystemGraph, x=None, ignore_suppliers=True):
+def risk_by_cutsets(sg: SystemGraph, x=None, cutsets=None, ignore_suppliers=True):
     if x is None:
         x = collect_x(sg)
 
-    cutsets = find_minimal_cutsets(sg, ignore_suppliers)
+    if cutsets is None:
+        cutsets = find_minimal_cutsets(sg, ignore_suppliers)
 
     return probability_any_cutset(cutsets, x)
 

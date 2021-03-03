@@ -1,5 +1,6 @@
 from dataclasses import field
 from typing import FrozenSet
+from collections import defaultdict
 
 from pydantic.dataclasses import dataclass
 
@@ -88,7 +89,7 @@ class SystemGraph:
     offerings: FrozenSet[Offering]
     indicator: Indicator
 
-    def valid_values(self):
+    def valid_values(self) -> bool:
         parts = all([all([c.valid_values() for c in self.components]),
                      all([s.valid_values() for s in self.suppliers]),
                      all([o.valid_values() for o in self.offerings]),
@@ -110,3 +111,19 @@ class SystemGraph:
                      ])
 
         return parts and whole and valid_ids
+
+    def structure(self) -> int:
+        graph = defaultdict(list)
+        for c in self.components:
+            graph[c].append(c.identifier)
+            graph[c].append(c.logic_function)
+
+        for s in self.suppliers:
+            graph[s].append(s.identifier)
+
+        for e in self.security_dependencies:
+            graph[e.risk_dst_id].append(e.risk_src_id)
+
+        structure = frozenset([tuple(entry) for entry in graph.values()])
+
+        return hash(structure)

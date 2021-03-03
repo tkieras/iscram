@@ -3,10 +3,6 @@ import abc
 from iscram.domain.model import SystemGraph
 
 
-class RepositoryError(RuntimeError):
-    pass
-
-
 class AbstractRepository(abc.ABC):
     @abc.abstractmethod
     def get(self, sg: SystemGraph, resource_identifier: str):
@@ -26,23 +22,38 @@ class FakeRepository(AbstractRepository):
         self.storage = {}
 
     def get(self, sg: SystemGraph, resource_identifier: str):
+        if resource_identifier == "cutsets":
+            key = sg.structure()
+        else:
+            key = sg
+
         try:
-            result = self.storage[sg][resource_identifier]
+            result = self.storage[key][resource_identifier]
         except KeyError:
-            raise RepositoryError
+            result = None
 
         return result
 
     def put(self, sg: SystemGraph, resource_identifier: str, data):
-        if sg not in self.storage:
-            self.storage[sg] = {}
+        if resource_identifier == "cutsets":
+            key = sg.structure()
+        else:
+            key = sg
 
-        self.storage[sg][resource_identifier] = data
+        if key not in self.storage:
+            self.storage[key] = {}
+
+        self.storage[key][resource_identifier] = data
 
     def delete(self, sg: SystemGraph, resource_identifier: str):
-        try:
-            self.storage[sg][resource_identifier]
-        except KeyError:
-            raise RepositoryError
+        if resource_identifier == "cutsets":
+            key = sg.structure()
+        else:
+            key = sg
 
-        self.storage[sg].pop(resource_identifier)
+        try:
+            self.storage[key][resource_identifier]
+        except KeyError:
+            return None
+
+        self.storage[key].pop(resource_identifier)
