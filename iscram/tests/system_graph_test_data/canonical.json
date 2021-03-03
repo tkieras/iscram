@@ -1,0 +1,104 @@
+{
+  "components": [
+    {
+      "cost": 0,
+      "logic_function": "and",
+      "identifier": "seven",
+      "risk": 0.0
+    },
+    {
+      "cost": 0,
+      "logic_function": "and",
+      "identifier": "six",
+      "risk": 0.0
+    },
+    {
+      "cost": 0,
+      "logic_function": "and",
+      "identifier": "four",
+      "risk": 0.0
+    },
+    {
+      "cost": 0,
+      "logic_function": "and",
+      "identifier": "nine",
+      "risk": 0.0
+    },
+    {
+      "cost": 0,
+      "logic_function": "and",
+      "identifier": "one",
+      "risk": 0.0
+    },
+    {
+      "cost": 0,
+      "logic_function": "or",
+      "identifier": "two",
+      "risk": 0.0
+    },
+    {
+      "cost": 0,
+      "logic_function": "and",
+      "identifier": "three",
+      "risk": 0.0
+    },
+    {
+      "cost": 0,
+      "logic_function": "or",
+      "identifier": "five",
+      "risk": 0.0
+    },
+    {
+      "cost": 0,
+      "logic_function": "and",
+      "identifier": "eight",
+      "risk": 0.0
+    }
+  ],
+  "indicator": {
+    "dependencies": [
+      {
+        "risk_dst_id": "indicator",
+        "risk_src_id": "one"
+      }
+    ],
+    "logic_function": "and"
+  },
+  "name": "simple",
+  "offerings": [],
+  "security_dependencies": [
+    {
+      "risk_dst_id": "four",
+      "risk_src_id": "eight"
+    },
+    {
+      "risk_dst_id": "one",
+      "risk_src_id": "two"
+    },
+    {
+      "risk_dst_id": "five",
+      "risk_src_id": "six"
+    },
+    {
+      "risk_dst_id": "five",
+      "risk_src_id": "seven"
+    },
+    {
+      "risk_dst_id": "one",
+      "risk_src_id": "five"
+    },
+    {
+      "risk_dst_id": "two",
+      "risk_src_id": "four"
+    },
+    {
+      "risk_dst_id": "two",
+      "risk_src_id": "three"
+    },
+    {
+      "risk_dst_id": "four",
+      "risk_src_id": "nine"
+    }
+  ],
+  "suppliers": []
+}
