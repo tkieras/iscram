@@ -59,13 +59,22 @@ def test_manually_inserted_cutsets(simple_or: SystemGraph):
     risk = services.get_risk(simple_or, repo)
 
     assert risk == approx(1 - (.75 * .75 * .75)) ## make sure we can clear bad info from cache
-#
-# def test_scale_rand_tree_25():
-#     json_str = read_text("iscram.tests.system_graph_test_data", "random_tree_25.json")
+
+
+# def test_scale_rand_tree_50():
+#     json_str = read_text("iscram.tests.system_graph_test_data", "random_tree_50.json")
 #
 #     sg = load_system_graph_json_str(json_str)
 #     repo = FakeRepository()
 #     assert services.get_risk(sg, repo) >= 0.0
+
+
+def test_scale_rand_tree_25():
+    json_str = read_text("iscram.tests.system_graph_test_data", "random_tree_25.json")
+
+    sg = load_system_graph_json_str(json_str)
+    repo = FakeRepository()
+    assert services.get_risk(sg, repo) >= 0.0
 
 def test_scale_rand_tree_10():
     json_str = read_text("iscram.tests.system_graph_test_data", "random_tree_10.json")

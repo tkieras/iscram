@@ -69,7 +69,7 @@ def test_risk_by_function_simple_and(simple_and: SystemGraph):
 def test_risk_by_function_sg_simple_and(simple_and: SystemGraph):
     assert(risk_by_function(simple_and) == 0.0)
 
-
-@pytest.mark.parametrize("count", range(5))
-def test_biequal_risk_functions(rand_tree_sg, count):
-    assert(risk_by_function(rand_tree_sg) == pytest.approx(risk_by_cutsets(rand_tree_sg)))
+#
+# @pytest.mark.parametrize("count", range(5))
+# def test_biequal_risk_functions(rand_tree_sg, count):
+#     assert(risk_by_function(rand_tree_sg) == pytest.approx(risk_by_cutsets(rand_tree_sg)))

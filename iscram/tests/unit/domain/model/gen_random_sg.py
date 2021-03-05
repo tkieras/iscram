@@ -28,6 +28,7 @@ def gen_random_tree(n, save=False):
         parent = random.choice(used)
         nodes.add(child)
         edges.add((child, parent))
+        used.append(child)
 
     nodes.remove("0")
     ind_edges = list(filter(lambda e: e[1] == "0", edges))
@@ -47,3 +48,7 @@ def gen_random_tree(n, save=False):
             outfile.write(dump_system_graph_json_str(sg))
 
     return sg
+
+
+if __name__ == "__main__":
+    gen_random_tree(50, True)

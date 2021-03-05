@@ -1,1 +1,254 @@
-{"components": [{"cost": 50, "identifier": "3", "logic_function": "or", "risk": 0.2678040765548563}, {"cost": 72, "identifier": "8", "logic_function": "and", "risk": 0.3693433232106409}, {"cost": 52, "identifier": "15", "logic_function": "and", "risk": 0.6916386399976805}, {"cost": 98, "identifier": "16", "logic_function": "or", "risk": 0.1422326560821333}, {"cost": 68, "identifier": "17", "logic_function": "and", "risk": 0.0664203685098238}, {"cost": 19, "identifier": "11", "logic_function": "or", "risk": 0.4321035915044614}, {"cost": 65, "identifier": "19", "logic_function": "and", "risk": 0.40391962195688447}, {"cost": 80, "identifier": "2", "logic_function": "or", "risk": 0.6373382042303163}, {"cost": 30, "identifier": "24", "logic_function": "and", "risk": 0.4362593398760056}, {"cost": 1, "identifier": "13", "logic_function": "and", "risk": 0.08099767989200823}, {"cost": 36, "identifier": "12", "logic_function": "and", "risk": 0.6019454063827276}, {"cost": 72, "identifier": "21", "logic_function": "or", "risk": 0.2999994021710872}, {"cost": 92, "identifier": "20", "logic_function": "or", "risk": 0.7876763233609568}, {"cost": 29, "identifier": "14", "logic_function": "or", "risk": 0.6994934205650287}, {"cost": 89, "identifier": "4", "logic_function": "or", "risk": 0.8506731441122782}, {"cost": 11, "identifier": "1", "logic_function": "or", "risk": 0.760959462511375}, {"cost": 66, "identifier": "10", "logic_function": "or", "risk": 0.7411300178200498}, {"cost": 83, "identifier": "22", "logic_function": "and", "risk": 0.32927808750147536}, {"cost": 62, "identifier": "7", "logic_function": "and", "risk": 0.5432610653508542}, {"cost": 58, "identifier": "9", "logic_function": "and", "risk": 0.4351747776951107}, {"cost": 82, "identifier": "23", "logic_function": "and", "risk": 0.8962706528401823}, {"cost": 35, "identifier": "6", "logic_function": "and", "risk": 0.30459242794341823}, {"cost": 32, "identifier": "18", "logic_function": "and", "risk": 0.1861423244219117}, {"cost": 69, "identifier": "5", "logic_function": "or", "risk": 0.8374346652578245}], "indicator": {"dependencies": [{"risk_dst_id": "0", "risk_src_id": "20"}, {"risk_dst_id": "0", "risk_src_id": "23"}, {"risk_dst_id": "0", "risk_src_id": "8"}, {"risk_dst_id": "0", "risk_src_id": "14"}, {"risk_dst_id": "0", "risk_src_id": "24"}, {"risk_dst_id": "0", "risk_src_id": "12"}, {"risk_dst_id": "0", "risk_src_id": "10"}, {"risk_dst_id": "0", "risk_src_id": "9"}, {"risk_dst_id": "0", "risk_src_id": "13"}, {"risk_dst_id": "0", "risk_src_id": "22"}, {"risk_dst_id": "0", "risk_src_id": "3"}, {"risk_dst_id": "0", "risk_src_id": "6"}, {"risk_dst_id": "0", "risk_src_id": "16"}, {"risk_dst_id": "0", "risk_src_id": "2"}, {"risk_dst_id": "0", "risk_src_id": "21"}, {"risk_dst_id": "0", "risk_src_id": "5"}, {"risk_dst_id": "0", "risk_src_id": "4"}, {"risk_dst_id": "0", "risk_src_id": "1"}, {"risk_dst_id": "0", "risk_src_id": "15"}, {"risk_dst_id": "0", "risk_src_id": "11"}, {"risk_dst_id": "0", "risk_src_id": "7"}, {"risk_dst_id": "0", "risk_src_id": "17"}, {"risk_dst_id": "0", "risk_src_id": "18"}, {"risk_dst_id": "0", "risk_src_id": "19"}], "logic_function": "and"}, "name": "rand_tree", "offerings": [], "security_dependencies": [], "suppliers": []}
+{
+  "components": [
+    {
+      "cost": 89,
+      "identifier": "6",
+      "logic_function": "or",
+      "risk": 0.03805432076585957
+    },
+    {
+      "cost": 16,
+      "identifier": "15",
+      "logic_function": "or",
+      "risk": 0.3531367372317902
+    },
+    {
+      "cost": 64,
+      "identifier": "24",
+      "logic_function": "and",
+      "risk": 0.24805123135324403
+    },
+    {
+      "cost": 35,
+      "identifier": "16",
+      "logic_function": "or",
+      "risk": 0.6089952369560303
+    },
+    {
+      "cost": 14,
+      "identifier": "20",
+      "logic_function": "or",
+      "risk": 0.5929146682334885
+    },
+    {
+      "cost": 47,
+      "identifier": "19",
+      "logic_function": "and",
+      "risk": 0.9639653751248235
+    },
+    {
+      "cost": 90,
+      "identifier": "18",
+      "logic_function": "or",
+      "risk": 0.8929509054847039
+    },
+    {
+      "cost": 87,
+      "identifier": "5",
+      "logic_function": "or",
+      "risk": 0.35136259215490595
+    },
+    {
+      "cost": 79,
+      "identifier": "9",
+      "logic_function": "and",
+      "risk": 0.3072774476432033
+    },
+    {
+      "cost": 53,
+      "identifier": "21",
+      "logic_function": "or",
+      "risk": 0.8863206075807022
+    },
+    {
+      "cost": 9,
+      "identifier": "14",
+      "logic_function": "and",
+      "risk": 0.2999464194919118
+    },
+    {
+      "cost": 22,
+      "identifier": "1",
+      "logic_function": "and",
+      "risk": 0.9381927146027177
+    },
+    {
+      "cost": 59,
+      "identifier": "3",
+      "logic_function": "and",
+      "risk": 0.754635402805887
+    },
+    {
+      "cost": 9,
+      "identifier": "22",
+      "logic_function": "and",
+      "risk": 0.7193409148445993
+    },
+    {
+      "cost": 99,
+      "identifier": "10",
+      "logic_function": "or",
+      "risk": 0.5967999128306156
+    },
+    {
+      "cost": 30,
+      "identifier": "13",
+      "logic_function": "or",
+      "risk": 0.9268294705256404
+    },
+    {
+      "cost": 0,
+      "identifier": "8",
+      "logic_function": "and",
+      "risk": 0.026863194432573123
+    },
+    {
+      "cost": 72,
+      "identifier": "4",
+      "logic_function": "or",
+      "risk": 0.9804363780040062
+    },
+    {
+      "cost": 13,
+      "identifier": "23",
+      "logic_function": "or",
+      "risk": 0.03333360545245767
+    },
+    {
+      "cost": 38,
+      "identifier": "17",
+      "logic_function": "or",
+      "risk": 0.8268826433370239
+    },
+    {
+      "cost": 45,
+      "identifier": "12",
+      "logic_function": "and",
+      "risk": 0.5878189023034446
+    },
+    {
+      "cost": 3,
+      "identifier": "2",
+      "logic_function": "or",
+      "risk": 0.8470915104462385
+    },
+    {
+      "cost": 6,
+      "identifier": "11",
+      "logic_function": "or",
+      "risk": 0.18857891442918706
+    },
+    {
+      "cost": 47,
+      "identifier": "7",
+      "logic_function": "or",
+      "risk": 0.275203368413536
+    }
+  ],
+  "indicator": {
+    "dependencies": [
+      {
+        "risk_dst_id": "0",
+        "risk_src_id": "16"
+      },
+      {
+        "risk_dst_id": "0",
+        "risk_src_id": "17"
+      }
+    ],
+    "logic_function": "or"
+  },
+  "name": "rand_tree",
+  "offerings": [],
+  "security_dependencies": [
+    {
+      "risk_dst_id": "17",
+      "risk_src_id": "3"
+    },
+    {
+      "risk_dst_id": "17",
+      "risk_src_id": "6"
+    },
+    {
+      "risk_dst_id": "6",
+      "risk_src_id": "20"
+    },
+    {
+      "risk_dst_id": "2",
+      "risk_src_id": "22"
+    },
+    {
+      "risk_dst_id": "2",
+      "risk_src_id": "1"
+    },
+    {
+      "risk_dst_id": "12",
+      "risk_src_id": "4"
+    },
+    {
+      "risk_dst_id": "3",
+      "risk_src_id": "7"
+    },
+    {
+      "risk_dst_id": "21",
+      "risk_src_id": "14"
+    },
+    {
+      "risk_dst_id": "6",
+      "risk_src_id": "2"
+    },
+    {
+      "risk_dst_id": "6",
+      "risk_src_id": "11"
+    },
+    {
+      "risk_dst_id": "9",
+      "risk_src_id": "23"
+    },
+    {
+      "risk_dst_id": "5",
+      "risk_src_id": "24"
+    },
+    {
+      "risk_dst_id": "20",
+      "risk_src_id": "15"
+    },
+    {
+      "risk_dst_id": "17",
+      "risk_src_id": "12"
+    },
+    {
+      "risk_dst_id": "1",
+      "risk_src_id": "8"
+    },
+    {
+      "risk_dst_id": "13",
+      "risk_src_id": "18"
+    },
+    {
+      "risk_dst_id": "6",
+      "risk_src_id": "13"
+    },
+    {
+      "risk_dst_id": "19",
+      "risk_src_id": "5"
+    },
+    {
+      "risk_dst_id": "17",
+      "risk_src_id": "10"
+    },
+    {
+      "risk_dst_id": "1",
+      "risk_src_id": "9"
+    },
+    {
+      "risk_dst_id": "17",
+      "risk_src_id": "21"
+    },
+    {
+      "risk_dst_id": "20",
+      "risk_src_id": "19"
+    }
+  ],
+  "suppliers": []
+}
