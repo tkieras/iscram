@@ -14,11 +14,11 @@ class MOCUSError(RuntimeError):
     pass
 
 
-def find_minimal_cutsets(sg: SystemGraph, ignore_suppliers=True) -> FrozenSet[FrozenSet[str]]:
+def find_minimal_cutsets(sg: SystemGraph, ignore_suppliers=False) -> FrozenSet[FrozenSet[str]]:
     return mocus(sg, ignore_suppliers)
 
 
-def mocus(sg: SystemGraph, ignore_suppliers=True) -> FrozenSet[FrozenSet[str]]:
+def mocus(sg: SystemGraph, ignore_suppliers=False) -> FrozenSet[FrozenSet[str]]:
     """ Something should be said to note that the input graph differs from
         a traditional fault-tree. Specifically, all nodes here are both events and logic gates.
         So strictly this is a MOCUS-like algorithm.

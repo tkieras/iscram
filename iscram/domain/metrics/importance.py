@@ -5,7 +5,7 @@ from iscram.domain.metrics.risk import (
 )
 
 
-def birnbaum_structural_importance(sg: SystemGraph, ignore_suppliers=True):
+def birnbaum_structural_importance(sg: SystemGraph, ignore_suppliers=False):
     all_ids = {c.identifier for c in sg.components}
     all_ids.update({s.identifier for s in sg.suppliers})
 
@@ -15,7 +15,7 @@ def birnbaum_structural_importance(sg: SystemGraph, ignore_suppliers=True):
     return birnbaum_importance(sg, x, ignore_suppliers)
 
 
-def birnbaum_importance(sg: SystemGraph, x=None, ignore_suppliers=True):
+def birnbaum_importance(sg: SystemGraph, x=None, ignore_suppliers=False):
     b_imps = {}
     cutsets = find_minimal_cutsets(sg, ignore_suppliers)
     all_ids = {c.identifier for c in sg.components}
