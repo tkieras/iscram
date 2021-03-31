@@ -2,7 +2,7 @@ from importlib.resources import read_text
 
 from pytest import approx
 
-from iscram.domain.model import SystemGraph
+from iscram.domain.model import SystemGraph, Trait
 
 from iscram.adapters.repository import FakeRepository
 
@@ -25,6 +25,21 @@ def test_get_birnbaum_importance(simple_and: SystemGraph):
     b_imps = services.get_birnbaum_importances(simple_and, repo)
 
     assert len(b_imps) != 0
+
+
+def test_select_attribute_no_suppliers(full_example: SystemGraph):
+    repo = FakeRepository()
+    result = services.get_birnbaum_importances_select(full_example, Trait("domestic", False), repo)
+
+    assert "birnbaum_importances_select_domestic_False" in result
+
+
+def test_select_attribute_suppliers(simple_and_suppliers: SystemGraph):
+    repo = FakeRepository()
+    result = services.get_birnbaum_importances_select(simple_and_suppliers, Trait("domestic", False), repo)
+
+    assert "birnbaum_importances_select_domestic_False" in result
+    assert result["birnbaum_importances_select_domestic_False"] == 0
 
 
 def test_get_cutsets(simple_and: SystemGraph):
@@ -59,6 +74,7 @@ def test_manually_inserted_cutsets(simple_or: SystemGraph):
     risk = services.get_risk(simple_or, repo)
 
     assert risk == approx(1 - (.75 * .75 * .75)) ## make sure we can clear bad info from cache
+
 
 
 # def test_scale_rand_tree_50():

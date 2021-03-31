@@ -34,9 +34,31 @@ async def birnbaum_importances(sg: SystemGraph = Body(...)):
     return {"birnbaum_importances": services.get_birnbaum_importances(sg, repo)}
 
 
+@app.post("/attribute/{att}/{val}/birnbaum-structural-importances")
+async def attr_birnbaum_structural_importances(att, val, sg: SystemGraph = Body(...)):
+    try:
+        selector = services.selector(att, bool(int(val)))
+    except ValueError:
+        return {"message": "Error: attribute value must be of integer type."}
+
+    return services.get_birnbaum_structural_importances_select(sg, selector, repo)
+
+
+@app.post("/attribute/{att}/{val}/birnbaum-importances")
+async def attr_birnbaum_importances(att, val, sg: SystemGraph = Body(...)):
+    selector = services.selector(att, bool(val))
+    return services.get_birnbaum_importances_select(sg, selector, repo)
+
+
+@app.post("/fractional_importance_traits")
+async def fractional_importance_traits(sg: SystemGraph = Body(...)):
+    return services.get_fractional_importance_traits(sg)
+
+
 @app.get("/status")
 async def status():
-    return {"status" : "alive"}
+    return {"status": "alive"}
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=7913, timeout_keep_alive=300, log_level="trace")
