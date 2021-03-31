@@ -62,27 +62,46 @@
   "suppliers": [
     {
       "identifier": "ten",
-      "trust": 0.75
+      "trust": 0.75,
+      "attributes": [
+        {"key": "domestic", "value": false},
+        {"key": "certified", "value": false}
+      ]
     },
     {
       "identifier": "eleven",
-      "trust": 1.0
+      "trust": 1.0,
+      "attributes": [
+        {"key": "domestic", "value": false}
+      ]
     },
     {
       "identifier": "twelve",
-      "trust": 1.0
+      "trust": 1.0,
+      "attributes": [
+        {"key": "domestic", "value": true}
+      ]
     },
     {
       "identifier": "thirteen",
-      "trust": 1.0
+      "trust": 1.0,
+      "attributes": [
+        {"key": "domestic", "value": true}
+      ]
     },
     {
       "identifier": "fourteen",
-      "trust": 1.0
+      "trust": 1.0,
+      "attributes": [
+        {"key": "domestic", "value": true}
+      ]
     },
     {
       "identifier": "fifteen",
-      "trust": 0.5
+      "trust": 0.5,
+      "attributes": [
+        {"key": "domestic", "value": false}
+      ]
     }
   ]
 }

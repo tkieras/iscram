@@ -1,0 +1,337 @@
+{
+	"components": [
+		{
+			"cost": 0,
+			"logic_function": "and",
+			"risk": 0.1,
+			"identifier": "1"
+		},
+		{
+			"cost": 0,
+			"logic_function": "or",
+			"risk": 0.01,
+			"identifier": "2"
+		},
+		{
+			"cost": 0,
+			"logic_function": "and",
+			"risk": 0.15,
+			"identifier": "3"
+		},
+		{
+			"cost": 0,
+			"logic_function": "or",
+			"risk": 0.05,
+			"identifier": "4"
+		},
+		{
+			"cost": 0,
+			"logic_function": "and",
+			"risk": 0.1,
+			"identifier": "5"
+		},
+		{
+			"cost": 0,
+			"logic_function": "and",
+			"risk": 0.09,
+			"identifier": "6"
+		},
+		{
+			"cost": 0,
+			"logic_function": "or",
+			"risk": 0.1,
+			"identifier": "7"
+		},
+		{
+			"cost": 0,
+			"logic_function": "and",
+			"risk": 0.03,
+			"identifier": "8"
+		},
+		{
+			"cost": 0,
+			"logic_function": "and",
+			"risk": 0.1,
+			"identifier": "9"
+		},
+		{
+			"cost": 0,
+			"logic_function": "or",
+			"risk": 0.12,
+			"identifier": "10"
+		},
+		{
+			"cost": 0,
+			"logic_function": "and",
+			"risk": 0.09,
+			"identifier": "11"
+		},
+		{
+			"cost": 0,
+			"logic_function": "or",
+			"risk": 0.11,
+			"identifier": "12"
+		},
+		{
+			"cost": 0,
+			"logic_function": "and",
+			"risk": 0.13,
+			"identifier": "13"
+		},
+		{
+			"cost": 0,
+			"logic_function": "or",
+			"risk": 0.2,
+			"identifier": "14"
+		},
+		{
+			"cost": 0,
+			"logic_function": "and",
+			"risk": 0.1,
+			"identifier": "15"
+		}
+	],
+	"suppliers": [
+		{
+			"identifier": "16",
+			"trust": 0.98,
+			"traits": [
+				{"key": "domestic", "value": false},
+				{"key": "certified", "value": true}
+			]
+		},
+		{
+			"identifier": "17",
+			"trust": 0.99,
+			"traits": [
+				{"key": "domestic", "value": false},
+				{"key": "certified", "value": false}
+			]
+		},
+		{
+			"identifier": "18",
+			"trust": 0.98,
+			"traits": [
+				{"key": "domestic", "value": false},
+				{"key": "certified", "value": false}
+			]
+		},
+		{
+			"identifier": "19",
+			"trust": 0.93,
+			"traits": [
+				{"key": "domestic", "value": false},
+				{"key": "certified", "value": true}
+			]
+		},
+		{
+			"identifier": "20",
+			"trust": 0.95,
+			"traits": [
+				{"key": "domestic", "value": false},
+				{"key": "certified", "value": true}
+			]
+		},
+		{
+			"identifier": "21",
+			"trust": 0.96,
+			"traits": [
+				{"key": "domestic", "value": true},
+				{"key": "certified", "value": false}
+			]
+		},
+		{
+			"identifier": "22",
+			"trust": 0.92,
+			"traits": [
+				{"key": "domestic", "value": true},
+				{"key": "certified", "value": false}
+			]
+		},
+		{
+			"identifier": "23",
+			"trust": 0.92,
+			"traits": [
+				{"key": "domestic", "value": true},
+				{"key": "certified", "value": false}
+			]
+		},
+		{
+			"identifier": "24",
+			"trust": 0.99,
+			"traits": [
+				{"key": "domestic", "value": true},
+				{"key": "certified", "value": false}
+			]
+		},
+		{
+			"identifier": "25",
+			"trust": 0.93,
+			"traits": [
+				{"key": "domestic", "value": true},
+				{"key": "certified", "value": false}
+			]
+		},
+		{
+			"identifier": "26",
+			"trust": 0.98,
+			"traits": [
+				{"key": "domestic", "value": true},
+				{"key": "certified", "value": true}
+			]
+		},
+		{
+			"identifier": "27",
+			"trust": 0.95,
+			"traits": [
+				{"key": "domestic", "value": true},
+				{"key": "certified", "value": true}
+			]
+		},
+		{
+			"identifier": "28",
+			"trust": 0.97,
+			"traits": [
+				{"key": "domestic", "value": true},
+				{"key": "certified", "value": true}
+			]
+		},
+		{
+			"identifier": "29",
+			"trust": 0.96,
+			"traits": [
+				{"key": "domestic", "value": true},
+				{"key": "certified", "value": true}
+			]
+		}
+	],
+	"indicator": {
+		"logic_function": "and",
+		"dependencies": [
+			{
+				"risk_src_id": "1",
+				"risk_dst_id": "indicator"
+			},
+			{
+				"risk_src_id": "2",
+				"risk_dst_id": "indicator"
+			}
+		]
+	},
+	"security_dependencies": [
+		{
+			"risk_src_id": "3",
+			"risk_dst_id": "1"
+		},
+		{
+			"risk_src_id": "4",
+			"risk_dst_id": "1"
+		},
+		{
+			"risk_src_id": "5",
+			"risk_dst_id": "2"
+		},
+		{
+			"risk_src_id": "6",
+			"risk_dst_id": "2"
+		},
+		{
+			"risk_src_id": "7",
+			"risk_dst_id": "2"
+		},
+		{
+			"risk_src_id": "8",
+			"risk_dst_id": "3"
+		},
+		{
+			"risk_src_id": "9",
+			"risk_dst_id": "4"
+		},
+		{
+			"risk_src_id": "10",
+			"risk_dst_id": "5"
+		},
+		{
+			"risk_src_id": "11",
+			"risk_dst_id": "6"
+		},
+		{
+			"risk_src_id": "12",
+			"risk_dst_id": "7"
+		},
+		{
+			"risk_src_id": "13",
+			"risk_dst_id": "7"
+		},
+		{
+			"risk_src_id": "14",
+			"risk_dst_id": "8"
+		},
+		{
+			"risk_src_id": "15",
+			"risk_dst_id": "8"
+		},
+		{
+			"risk_src_id": "16",
+			"risk_dst_id": "1"
+		},
+		{
+			"risk_src_id": "17",
+			"risk_dst_id": "2"
+		},
+		{
+			"risk_src_id": "25",
+			"risk_dst_id": "3"
+		},
+		{
+			"risk_src_id": "19",
+			"risk_dst_id": "4"
+		},
+		{
+			"risk_src_id": "20",
+			"risk_dst_id": "5"
+		},
+		{
+			"risk_src_id": "21",
+			"risk_dst_id": "6"
+		},
+		{
+			"risk_src_id": "22",
+			"risk_dst_id": "7"
+		},
+		{
+			"risk_src_id": "23",
+			"risk_dst_id": "8"
+		},
+		{
+			"risk_src_id": "24",
+			"risk_dst_id": "10"
+		},
+		{
+			"risk_src_id": "25",
+			"risk_dst_id": "9"
+		},
+		{
+			"risk_src_id": "26",
+			"risk_dst_id": "11"
+		},
+		{
+			"risk_src_id": "27",
+			"risk_dst_id": "12"
+		},
+		{
+			"risk_src_id": "28",
+			"risk_dst_id": "13"
+		},
+		{
+			"risk_src_id": "29",
+			"risk_dst_id": "14"
+		},
+		{
+			"risk_src_id": "29",
+			"risk_dst_id": "15"
+		}
+	],
+	"offerings": [],
+	"name" : "example"
+}

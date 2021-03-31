@@ -42,9 +42,16 @@ class Component:
 
 
 @dataclass(frozen=True)
+class Trait:
+    key: str
+    value: bool
+
+
+@dataclass(frozen=True)
 class Supplier:
     identifier: str
     trust: float = 1.0
+    traits: FrozenSet[Trait] = field(default_factory=set)
 
     def valid_values(self):
         return all([validate_identifier(self.identifier),

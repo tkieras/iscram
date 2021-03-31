@@ -48,5 +48,12 @@ def simple_and_suppliers():
 
 
 @pytest.fixture
+def full_example():
+    json_str = read_text("iscram.tests.system_graph_test_data", "full_example.json")
+
+    return load_system_graph_json_str(json_str)
+
+
+@pytest.fixture
 def rand_tree_sg():
     return gen_random_tree(10)
