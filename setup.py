@@ -11,7 +11,7 @@ setup(
 		"jsons==1.4.0",
 		"pydantic==1.7.3",
 		"pytest==6.2.2",
-		"uvicorn==0.11.3",
+		"uvicorn==0.11.7",
 		"numpy==1.20.1",
 		"fastapi==0.63.0"
 	],
