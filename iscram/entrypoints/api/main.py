@@ -61,4 +61,4 @@ async def fractional_importance_traits(sg: SystemGraph = Body(...)):
 
 @app.get("/status")
 async def status():
-    return {"status": "alive"}
+    return {"status": "alive!"}
