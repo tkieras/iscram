@@ -7,8 +7,6 @@ services:
       dockerfile: ./compose/dev/Dockerfile
     image: iscram-dev:latest
     container_name: iscram-dev
-    volumes:
-        - ./iscram:/usr/src/app/iscram
     ports:
       - 8000:8000
 
@@ -18,7 +16,5 @@ services:
       dockerfile: ./compose/prod/Dockerfile
     image: iscram-prod:latest
     container_name: iscram-prod
-    volumes:
-      - ./iscram:/usr/src/app/iscram
     ports:
       - 80:80
