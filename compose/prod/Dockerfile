@@ -14,8 +14,8 @@ COPY --from=BASE /root/wheels /root/wheels
 
 RUN python -m ensurepip
 RUN pip install --no-index --find-links=/root/wheels /root/wheels/*
-RUN python setup.py sdist
-RUN pip install dist/*
+RUN python ./setup.py sdist
+RUN pip install ./dist/*
 
 EXPOSE 80
 
