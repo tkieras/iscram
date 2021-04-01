@@ -11,9 +11,7 @@ app = FastAPI(
     version="0.1.0",
 )
 
-origins = ["http://localhost",
-           "http://localhost:3000",
-           "https://www.tkieras.com/demo/iscram"]
+origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
