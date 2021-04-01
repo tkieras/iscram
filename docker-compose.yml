@@ -1,0 +1,24 @@
+version: "3.8"
+
+services:
+  iscram-dev:
+    build:
+      context: .
+      dockerfile: ./compose/dev/Dockerfile
+    image: iscram-dev:latest
+    container_name: iscram-dev
+    volumes:
+        - ./iscram:/usr/src/app/iscram
+    ports:
+      - 8000:8000
+
+  iscram-prod:
+    build:
+      context: .
+      dockerfile: ./compose/prod/Dockerfile
+    image: iscram-prod:latest
+    container_name: iscram-prod
+    volumes:
+      - ./iscram:/usr/src/app/iscram
+    ports:
+      - 80:80

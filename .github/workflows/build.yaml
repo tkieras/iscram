@@ -22,8 +22,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install flake8 pytest
-        python setup.py sdist
-        pip install dist/*
+        pip install -r requirements/prod/requirements.txt
 
     - name: Test with pytest
       run: |
@@ -52,9 +51,8 @@ jobs:
         ECR_REPOSITORY: iscram
         IMAGE_TAG: ${{ github.sha }}
       run: |
-        python setup.py sdist
-        docker build -t iscram .
-        docker tag iscram $ECR_REGISTRY/$ECR_REPOSITORY
+        docker-compose build iscram-prod
+        docker tag iscram-prod $ECR_REGISTRY/$ECR_REPOSITORY
         docker push $ECR_REGISTRY/$ECR_REPOSITORY
 
     - name: Logout of Amazon ECR

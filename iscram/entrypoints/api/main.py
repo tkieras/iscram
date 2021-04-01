@@ -1,14 +1,20 @@
 from fastapi import FastAPI, Body
 from fastapi.middleware.cors import CORSMiddleware
-import uvicorn
 
 from iscram.domain.model import SystemGraph
 from iscram.service_layer import services
 from iscram.adapters.repository import FakeRepository
 
-app = FastAPI()
+app = FastAPI(
+    title="ISCRAM: IoT Supply Chain Risk Analysis and Mitigation Tool (Server)",
+    description="Provides analysis and optimization services for systems represented as boolean function graphs.",
+    version="0.1.0",
+)
+
 origins = ["http://localhost",
-           "http://localhost:3000"]
+           "http://localhost:3000",
+           "https://www.tkieras.com/demo/iscram"]
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -58,7 +64,3 @@ async def fractional_importance_traits(sg: SystemGraph = Body(...)):
 @app.get("/status")
 async def status():
     return {"status": "alive"}
-
-
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=7913, timeout_keep_alive=300, log_level="trace")
