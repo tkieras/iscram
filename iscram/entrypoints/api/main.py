@@ -56,7 +56,7 @@ async def attr_birnbaum_importances(att, val, sg: SystemGraph = Body(...)):
 
 @app.post("/fractional_importance_traits")
 async def fractional_importance_traits(sg: SystemGraph = Body(...)):
-    return services.get_fractional_importance_traits(sg)
+    return {"fractional_importance_traits": services.get_fractional_importance_traits(sg)}
 
 
 @app.get("/status")

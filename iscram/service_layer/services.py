@@ -9,8 +9,19 @@ from iscram.domain.metrics.cutset import find_minimal_cutsets
 from iscram.domain.metrics.importance import (
     birnbaum_importance, birnbaum_structural_importance, fractional_importance_traits
 )
+from iscram.domain.metrics.scale import apply_scaling
 
 selector = namedtuple("selector", ["key", "value"])
+
+DEFAULT_PREFERENCES = {
+    "SCALE_METRICS": "MIN_MAX",
+    "RISK_SOURCE": "KNOWN"
+}
+
+def apply_prefs(user):
+    prefs = DEFAULT_PREFERENCES.copy()
+    prefs.update(user)
+    return prefs
 
 
 def get_cutsets(sg: SystemGraph, repo: AbstractRepository):
@@ -23,7 +34,7 @@ def get_cutsets(sg: SystemGraph, repo: AbstractRepository):
     return cutsets
 
 
-def get_risk(sg: SystemGraph, repo: AbstractRepository):
+def get_risk(sg: SystemGraph, repo: AbstractRepository, prefs={}):
 
     result = repo.get(sg, "risk")
 
@@ -36,7 +47,8 @@ def get_risk(sg: SystemGraph, repo: AbstractRepository):
     return risk
 
 
-def get_birnbaum_structural_importances(sg: SystemGraph, repo: AbstractRepository):
+def get_birnbaum_structural_importances(sg: SystemGraph, repo: AbstractRepository, prefs={}):
+    prefs = apply_prefs(prefs)
 
     result = repo.get(sg, "birnbaum_structural_importances")
 
@@ -44,10 +56,13 @@ def get_birnbaum_structural_importances(sg: SystemGraph, repo: AbstractRepositor
         result = birnbaum_structural_importance(sg)
         repo.put(sg, "birnbaum_structural_importances", result)
 
+    result = apply_scaling(result, prefs["SCALE_METRICS"])
+
     return result
 
 
-def get_birnbaum_importances(sg: SystemGraph, repo: AbstractRepository):
+def get_birnbaum_importances(sg: SystemGraph, repo: AbstractRepository, prefs={}):
+    prefs = apply_prefs(prefs)
 
     result = repo.get(sg, "birnbaum_importances")
 
@@ -55,10 +70,14 @@ def get_birnbaum_importances(sg: SystemGraph, repo: AbstractRepository):
         result = birnbaum_importance(sg)
         repo.put(sg, "birnbaum_importances", result)
 
+    result = apply_scaling(result, prefs["SCALE_METRICS"])
+
     return result
 
 
-def get_birnbaum_importances_select(sg: SystemGraph, selector, repo: AbstractRepository):
+def get_birnbaum_importances_select(sg: SystemGraph, selector, repo: AbstractRepository, prefs={}):
+    prefs = apply_prefs(prefs)
+
     select = []
 
     for n in sg.suppliers:
@@ -73,7 +92,9 @@ def get_birnbaum_importances_select(sg: SystemGraph, selector, repo: AbstractRep
     return {name: result["select"]}
 
 
-def get_birnbaum_structural_importances_select(sg: SystemGraph, selector, repo: AbstractRepository):
+def get_birnbaum_structural_importances_select(sg: SystemGraph, selector, repo: AbstractRepository, prefs={}):
+    prefs = apply_prefs(prefs)
+
     select = []
 
     for n in sg.suppliers:
@@ -88,5 +109,11 @@ def get_birnbaum_structural_importances_select(sg: SystemGraph, selector, repo: 
     return {name: result["select"]}
 
 
-def get_fractional_importance_traits(sg: SystemGraph):
-    return {"fractional_importance_traits": fractional_importance_traits(sg)}
+def get_fractional_importance_traits(sg: SystemGraph, prefs={}):
+    prefs = apply_prefs(prefs)
+
+    result = fractional_importance_traits(sg)
+
+    result = apply_scaling(result, prefs["SCALE_METRICS"])
+
+    return  result

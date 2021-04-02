@@ -14,7 +14,7 @@ from iscram.service_layer import services
 def test_get_birnbaum_structural_importance(simple_and: SystemGraph):
 
     repo = FakeRepository()
-    bst_imps = services.get_birnbaum_structural_importances(simple_and, repo)
+    bst_imps = services.get_birnbaum_structural_importances(simple_and, repo, {"SCALE_METRICS": "NONE"})
 
     assert len(bst_imps) != 0
 
@@ -76,7 +76,59 @@ def test_manually_inserted_cutsets(simple_or: SystemGraph):
     assert risk == approx(1 - (.75 * .75 * .75)) ## make sure we can clear bad info from cache
 
 
+def test_service_birnbaum_structural_importance_with_scaling(full_example: SystemGraph):
+    repo = FakeRepository()
+    b_imps = services.get_birnbaum_structural_importances(full_example, repo, {"SCALE_METRICS": "PROPORTIONAL"})
 
+    assert len(b_imps) != 0
+
+    assert approx(sum(b_imps.values()) == 1)
+
+
+def test_service_birnbaum_structural_importance_with_no_scaling(full_example: SystemGraph):
+    repo = FakeRepository()
+    b_imps = services.get_birnbaum_structural_importances(full_example, repo, {"SCALE_METRICS": "NONE"})
+
+    assert len(b_imps) != 0
+
+    assert approx(sum(b_imps.values()) == 1)
+
+
+def test_service_birnbaum_importance_with_scaling(full_example: SystemGraph):
+    repo = FakeRepository()
+    b_imps = services.get_birnbaum_importances(full_example, repo, {"SCALE_METRICS": "PROPORTIONAL"})
+
+    assert len(b_imps) != 0
+
+    assert approx(sum(b_imps.values()) == 1)
+
+
+def test_service_birnbaum_importance_with_no_scaling(full_example: SystemGraph):
+    repo = FakeRepository()
+    b_imps = services.get_birnbaum_importances(full_example, repo, {"SCALE_METRICS": "NONE"})
+
+    assert len(b_imps) != 0
+
+    assert approx(sum(b_imps.values()) < 1)
+
+
+def test_service_birnbaum_importance_default_scaling(full_example: SystemGraph):
+    repo = FakeRepository()
+    b_imps = services.get_birnbaum_importances(full_example, repo)
+
+    assert len(b_imps) != 0
+
+    assert approx(max(b_imps.values()) == 1)
+    assert approx(min(b_imps.values()) == 0)
+
+
+
+def test_service_fractional_importance_traits_with_scaling(full_example: SystemGraph):
+    f_imps = services.get_fractional_importance_traits(full_example, {"SCALE_METRICS": "PROPORTIONAL"})
+
+    assert len(f_imps) != 0
+
+    assert approx(sum(f_imps.values()) == 1)
 # def test_scale_rand_tree_50():
 #     json_str = read_text("iscram.tests.system_graph_test_data", "random_tree_50.json")
 #
