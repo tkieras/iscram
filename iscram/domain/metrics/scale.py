@@ -2,6 +2,9 @@ from typing import Dict
 
 
 def scale_proportionally(data: Dict):
+    if len(data) == 0:
+        return data
+
     total = sum(data.values())
 
     if total == 0:
@@ -11,6 +14,9 @@ def scale_proportionally(data: Dict):
 
 
 def scale_min_max(data: Dict):
+    if len(data) == 0:
+        return data
+
     min_v= min(data.values())
     max_v = max(data.values())
 
