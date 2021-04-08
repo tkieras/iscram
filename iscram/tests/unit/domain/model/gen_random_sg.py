@@ -16,11 +16,11 @@ def gen_random_tree(n, save=False):
     def rand_cost():
         return random.randint(0, 100)
 
-    unused = [str(i) for i in range(1, n)]
+    unused = ["x"+str(i) for i in range(1, n)]
     random.shuffle(unused)
 
-    used = ["0"]
-    nodes = {"0"}
+    used = ["indicator"]
+    nodes = {"indicator"}
     edges = set()
 
     while unused:
@@ -30,8 +30,8 @@ def gen_random_tree(n, save=False):
         edges.add((child, parent))
         used.append(child)
 
-    nodes.remove("0")
-    ind_edges = list(filter(lambda e: e[1] == "0", edges))
+    nodes.remove("indicator")
+    ind_edges = list(filter(lambda e: e[1] == "indicator", edges))
     for edge in ind_edges:
         edges.remove(edge)
 

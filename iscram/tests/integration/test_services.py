@@ -42,40 +42,6 @@ def test_select_attribute_suppliers(simple_and_suppliers: SystemGraph):
     assert result["birnbaum_importances_select_domestic_False"] == 0
 
 
-def test_get_cutsets(simple_and: SystemGraph):
-    repo = FakeRepository()
-    cutsets = services.get_cutsets(simple_and, repo)
-
-    assert len(cutsets) == 2
-
-
-def test_risk_cutsets_chained(simple_and: SystemGraph):
-    repo = FakeRepository()
-
-    risk = services.get_risk(simple_and, repo)
-
-    cutsets = repo.get(simple_and, "cutsets")
-
-    assert len(cutsets) == 2
-
-
-def test_manually_inserted_cutsets(simple_or: SystemGraph):
-    repo = FakeRepository()
-
-    repo.put(simple_or, "cutsets", frozenset([frozenset(["three"])])) ## false info
-
-    risk = services.get_risk(simple_or, repo)
-
-    assert risk == 0.25 # make sure we are actually using the cached, false info
-
-    repo.delete(simple_or, "cutsets")
-    repo.delete(simple_or, "risk")
-
-    risk = services.get_risk(simple_or, repo)
-
-    assert risk == approx(1 - (.75 * .75 * .75)) ## make sure we can clear bad info from cache
-
-
 def test_service_birnbaum_structural_importance_with_scaling(full_example: SystemGraph):
     repo = FakeRepository()
     b_imps = services.get_birnbaum_structural_importances(full_example, repo, {"SCALE_METRICS": "PROPORTIONAL"})
@@ -122,31 +88,49 @@ def test_service_birnbaum_importance_default_scaling(full_example: SystemGraph):
     assert approx(min(b_imps.values()) == 0)
 
 
-
 def test_service_fractional_importance_traits_with_scaling(full_example: SystemGraph):
     f_imps = services.get_fractional_importance_traits(full_example, {"SCALE_METRICS": "PROPORTIONAL"})
 
     assert len(f_imps) != 0
 
     assert approx(sum(f_imps.values()) == 1)
-# def test_scale_rand_tree_50():
-#     json_str = read_text("iscram.tests.system_graph_test_data", "random_tree_50.json")
-#
-#     sg = load_system_graph_json_str(json_str)
-#     repo = FakeRepository()
-#     assert services.get_risk(sg, repo) >= 0.0
 
 
-def test_scale_rand_tree_25():
+def test_speed_importances_rand_tree_100():
+    json_str = read_text("iscram.tests.system_graph_test_data", "random_tree_100.json")
+
+    sg = load_system_graph_json_str(json_str)
+    repo = FakeRepository()
+    assert services.get_birnbaum_importances(sg, repo) is not None
+
+
+def test_speed_importances_rand_tree_75():
+    json_str = read_text("iscram.tests.system_graph_test_data", "random_tree_75.json")
+
+    sg = load_system_graph_json_str(json_str)
+    repo = FakeRepository()
+    assert services.get_birnbaum_importances(sg, repo) is not None
+
+
+def test_speed_importances_rand_tree_50():
+    json_str = read_text("iscram.tests.system_graph_test_data", "random_tree_50.json")
+
+    sg = load_system_graph_json_str(json_str)
+    repo = FakeRepository()
+    assert services.get_birnbaum_importances(sg, repo) is not None
+
+
+def test_speed_importances_rand_tree_25():
     json_str = read_text("iscram.tests.system_graph_test_data", "random_tree_25.json")
 
     sg = load_system_graph_json_str(json_str)
     repo = FakeRepository()
-    assert services.get_risk(sg, repo) >= 0.0
+    assert services.get_birnbaum_importances(sg, repo) is not None
 
-def test_scale_rand_tree_10():
+
+def test_speed_importances_rand_tree_10():
     json_str = read_text("iscram.tests.system_graph_test_data", "random_tree_10.json")
 
     sg = load_system_graph_json_str(json_str)
     repo = FakeRepository()
-    assert services.get_risk(sg, repo) >= 0.0
+    assert services.get_birnbaum_importances(sg, repo) is not None

@@ -13,3 +13,11 @@ def test_invalid_supplier():
     s = Supplier("test", 2.0)
 
     assert not s.valid_values()
+
+    s = Supplier("1", 1.0)
+
+    assert not s.valid_values()
+
+    s = Supplier("@a", 1.0)
+
+    assert not s.valid_values()

@@ -104,8 +104,7 @@ Each item in the component list has the following data:
 }
 ```
 
-The name may be any string that does not start with one of these reserved characters:
-	- ! @ # $ % ^ & *
+The name may be any string that begins with an alphabetic character (i.e., a-z or A-Z).
 
 The logic_function_option must be either "and" or "or".
 
@@ -126,8 +125,7 @@ Each supplier has the following data.
 }
 ```
 
-The name may be any string that does not start with one of these reserved characters:
-	- ! @ # $ % ^ & *
+The name may be any string that begins with an alphabetic character (i.e., a-z or A-Z).
 
 The trust must be a float between 0.0 and 1.0.
 

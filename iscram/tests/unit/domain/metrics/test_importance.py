@@ -1,10 +1,8 @@
 from pytest import approx
 
+from iscram.domain.model import SystemGraph
 from iscram.domain.metrics.importance import (
     birnbaum_importance, birnbaum_structural_importance, fractional_importance_traits
-)
-from iscram.domain.model import (
-    SystemGraph, Component, Indicator, RiskRelation
 )
 
 

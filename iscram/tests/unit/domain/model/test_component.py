@@ -22,6 +22,14 @@ def test_invalid_component():
 
     assert not c.valid_values()
 
+    c = Component("1", "and", 1.0, 3)
+
+    assert not c.valid_values()
+
+    c = Component("@f", "and", 1.0, 3)
+
+    assert not c.valid_values()
+
 
 def test_valid_component():
     c = Component("test", "or", 0.0, 30)

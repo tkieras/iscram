@@ -4,15 +4,13 @@ from collections import defaultdict
 
 from pydantic.dataclasses import dataclass
 
-RESTRICTED_IDENTIFIER_CHARS = {"!", "@", "#", "$", "%", "^", "&", "*"}
-
 
 def validate_identifier(identifier: str) -> bool:
     if len(identifier) == 0:
         return False
     if identifier == "indicator":
         return False
-    return not identifier[0] in RESTRICTED_IDENTIFIER_CHARS
+    return identifier[0].isalpha()
 
 
 def validate_logic_function(logic_function: str) -> bool:
