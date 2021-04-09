@@ -96,6 +96,14 @@ def test_service_fractional_importance_traits_with_scaling(full_example: SystemG
     assert approx(sum(f_imps.values()) == 1)
 
 
+def test_speed_importances_rand_tree_500():
+    json_str = read_text("iscram.tests.system_graph_test_data", "random_tree_500.json")
+
+    sg = load_system_graph_json_str(json_str)
+    repo = FakeRepository()
+    assert services.get_birnbaum_importances(sg, repo) is not None
+
+
 def test_speed_importances_rand_tree_100():
     json_str = read_text("iscram.tests.system_graph_test_data", "random_tree_100.json")
 

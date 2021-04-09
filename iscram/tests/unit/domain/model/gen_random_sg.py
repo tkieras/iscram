@@ -11,7 +11,7 @@ def gen_random_tree(n, save=False):
         return random.choice(["and", "or"])
 
     def rand_risk():
-        return random.random()
+        return random.uniform(0.001, 0.1)
 
     def rand_cost():
         return random.randint(0, 100)
@@ -51,4 +51,4 @@ def gen_random_tree(n, save=False):
 
 
 if __name__ == "__main__":
-    gen_random_tree(1000, True)
+    gen_random_tree(50, True)
