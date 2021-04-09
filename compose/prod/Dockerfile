@@ -1,23 +1,23 @@
-FROM tiangolo/uvicorn-gunicorn-fastapi:python3.8-slim as BASE
+FROM tiangolo/uvicorn-gunicorn-fastapi:python3.8 as BASE
 
-WORKDIR /app
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 
-COPY ./requirements/prod/requirements.txt ./
-RUN python -m ensurepip
-RUN pip wheel --wheel-dir=/root/wheels -r ./requirements.txt
+RUN git clone https://github.com/tulip-control/dd.git; \
+    cd dd; \
+    python3 -m ensurepip; \
+    pip install cython; \
+    python setup.py install --fetch --cudd
+
+COPY ./iscram ./iscram
+COPY ./setup.py setup.py
+RUN pip install .
 
 FROM tiangolo/uvicorn-gunicorn-fastapi:python3.8-slim as RELEASE
 
-WORKDIR /app
+COPY --from=BASE /opt/venv /opt/venv
 
-COPY --from=BASE /root/wheels /root/wheels
-COPY ./iscram ./iscram
-
-RUN python -m ensurepip
-RUN pip install --no-index --find-links=/root/wheels /root/wheels/*
-
-ENV PYTHONPATH="${PYTHONPATH}:/app"
-
+ENV PATH="/opt/venv/bin:$PATH"
 EXPOSE 80
 
 CMD ["uvicorn", "iscram.entrypoints.api.main:app", "--host", "0.0.0.0", "--port", "80"]

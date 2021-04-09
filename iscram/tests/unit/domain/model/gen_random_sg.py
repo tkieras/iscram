@@ -51,4 +51,4 @@ def gen_random_tree(n, save=False):
 
 
 if __name__ == "__main__":
-    gen_random_tree(50, True)
+    gen_random_tree(1000, True)
