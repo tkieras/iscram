@@ -76,8 +76,9 @@ def prep_for_bdd(sg: SystemGraph):
 def build_bdd(sg):
     exprs, order = prep_for_bdd(sg)
 
-    bdd = _bdd.BDD()
+    bdd = _bdd.BDD(memory_estimate=(int(2**30 * 0.3)))
     bdd.configure(reordering=True)
+
     bdd.declare(*(["indicator"] + [c.identifier for c in sg.components] + [s.identifier for s in sg.suppliers]))
 
     r = bdd.add_expr(exprs[0]["indicator"])
