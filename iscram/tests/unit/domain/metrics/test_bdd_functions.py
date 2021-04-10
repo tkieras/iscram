@@ -69,3 +69,22 @@ def test_prob_ex_sinnamon_1():
     '''
     assert pytest.approx(bdd_prob(bdd, r, p, dict()) == 3.0776e-4)
 
+
+def test_prob_negated_edge_basic():
+    r_expr = "a & ~b"
+    bdd = _bdd.BDD()
+    bdd.declare('a', 'b')
+    r = bdd.add_expr(r_expr)
+
+    x = {"a": 0.5, "b": 0.25}
+    assert (bdd_prob(bdd, r, x, dict()) == 0.375)
+
+
+def test_prob_negated_edge_basic_2():
+    r_expr = "a & ~(b | ~c)"
+    bdd = _bdd.BDD()
+    bdd.declare('a', 'b', 'c')
+    r = bdd.add_expr(r_expr)
+
+    x = {"a": 0.5, "b": 0.25, "c" : 0.125}
+    assert (bdd_prob(bdd, r, x, dict()) == 0.046875)

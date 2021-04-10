@@ -2,7 +2,7 @@ import dd.cudd as _bdd
 
 from iscram.domain.model import SystemGraph
 
-fmt_bdd = {"or" : " | ", "and": " & "}
+fmt_bdd = {"or": " | ", "and": " & "}
 
 
 def node_expr(n, logic, c_deps, s_deps):
@@ -93,15 +93,24 @@ def build_bdd(sg):
 
 
 def bdd_prob(bdd, f, p, memo):
-    if f == bdd.false: return 0
-    if f == bdd.true: return 1
+    """ Recursively evaluate the BDD probability at node f. Follows Shannon expansion as described by Rauzy.
+     Note: The BDD here should not be one that has been converted to minimal-cutset-only form.
+     To evaluate a minimal-cutset-only BDD a different algorithm is needed. """
 
-    r = memo.get(("prob", str(f)), None)
-    if r is not None:
-        return r
+    if f == bdd.false:
+        return 0
+    if f == bdd.true:
+        return 1
+    if (r := memo.get(("prob", str(f)), None)) is not None:
+        return 1 - r if f.negated else r
 
+    # f = ite(x, g, h)
     x, g, h = f.var, f.high, f.low
-    r = ((p[f.var] * bdd_prob(bdd, g, p, memo)) + ((1-p[f.var]) * bdd_prob(bdd, h, p, memo)))
+    r = p[x] * bdd_prob(bdd, g, p, memo) + (1-p[x]) * bdd_prob(bdd, h, p, memo)
+
+    # The memo holds the non-negated probability of f. Negation is handled after retrieval from memo.
     memo[("prob", str(f))] = r
-    return r
+
+    return 1-r if f.negated else r
+
 
