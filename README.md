@@ -18,9 +18,21 @@ The project requires Python 3.8+.
 
 `cd iscram`
 
+#### Setup with Docker
+
+`docker-compose --build iscram-dev`
+
+#### Setup Without Docker
+
 Install dependencies:
 
-`pip install -r requirements/prod/requirements.txt`
+`pip install -r requirements/dev/requirements.txt`
+
+* Note: In addition to the requirements listed explicitly, the package `dd` and its module `dd.cudd` must be manually installed.
+* Refer to `dd` documentation for installation instructions: https://github.com/tulip-control/dd .
+* To verify proper installation of `dd.cudd`, the following command should execute without error:
+
+`python -c "import dd.cudd" `
 
 (Recommended) Install ISCRAM Python package from source:
 
@@ -29,6 +41,23 @@ Install dependencies:
 Alternately, set the `PYTHONPATH` environment variable:
 
 - `export PYTHONPATH=$(PYTHONPATH):$(pwd)`
+
+### Run a local ISCRAM server with Docker
+
+After building the container image, run it.
+
+`docker-compose up iscram-dev`
+
+Run a smoke test with curl to verify server health:
+
+`curl localhost:8000/status`
+
+- If successfully running, the server should return:
+	- `{"health":"alive"}`
+
+API documentation can be found by visiting:
+
+- `localhost:8000/docs`
 
 ### Run a local ISCRAM server without Docker
 
@@ -53,7 +82,7 @@ API documentation can be found by visiting:
 
 For local usage of the ISCRAM functions, it is possible to run analysis without a server.
 
-After setup (above), do the following.
+After setup (above, without docker), do the following.
 
 `python -m iscram.entrypoints.cli.app -i <path/to/system-graph.json>`
 
