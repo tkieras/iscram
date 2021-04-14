@@ -1,3 +1,7 @@
+from typing import Dict, Optional
+import uvicorn
+from pydantic import BaseModel
+
 from fastapi import FastAPI, Body
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -23,42 +27,47 @@ app.add_middleware(
 repo = FakeRepository()
 
 
+class RequestBody(BaseModel):
+    system_graph: SystemGraph
+    data: Optional[Dict]
+    preferences: Optional[Dict]
+
+
 @app.post("/risk")
-async def risk(sg: SystemGraph = Body(...)):
-    return {"risk": services.get_risk(sg, repo)}
+async def risk(rq: RequestBody = Body(...)):
+    return {"risk": services.get_risk(rq.system_graph, repo, rq.data)}
 
 
 @app.post("/birnbaum-structural-importances")
-async def birnbaum_structural_importances(sg: SystemGraph = Body(...)):
-    return {"birnbaum_structural_importances": services.get_birnbaum_structural_importances(sg, repo)}
+async def birnbaum_structural_importances(rq: RequestBody = Body(...)):
+    return {"birnbaum_structural_importances": services.get_birnbaum_structural_importances(rq.system_graph, repo)}
 
 
 @app.post("/birnbaum-importances")
-async def birnbaum_importances(sg: SystemGraph = Body(...)):
-    return {"birnbaum_importances": services.get_birnbaum_importances(sg, repo)}
+async def birnbaum_importances(rq: RequestBody = Body(...)):
+    return {"birnbaum_importances": services.get_birnbaum_importances(rq.system_graph, repo, rq.data)}
 
 
 @app.post("/attribute/{att}/{val}/birnbaum-structural-importances")
-async def attr_birnbaum_structural_importances(att, val, sg: SystemGraph = Body(...)):
-    try:
-        selector = services.selector(att, bool(int(val)))
-    except ValueError:
-        return {"message": "Error: attribute value must be of integer type."}
+async def attr_birnbaum_structural_importances(att, val, rq: RequestBody = Body(...)):
 
-    return services.get_birnbaum_structural_importances_select(sg, selector, repo)
+    return services.get_birnbaum_structural_importances_select(rq.system_graph, {att: val}, repo, rq.data)
 
 
 @app.post("/attribute/{att}/{val}/birnbaum-importances")
-async def attr_birnbaum_importances(att, val, sg: SystemGraph = Body(...)):
-    selector = services.selector(att, bool(val))
-    return services.get_birnbaum_importances_select(sg, selector, repo)
+async def attr_birnbaum_importances(att, val, rq: RequestBody = Body(...)):
+    return services.get_birnbaum_importances_select(rq.system_graph, {att: val}, repo, rq.data)
 
 
 @app.post("/fractional_importance_traits")
-async def fractional_importance_traits(sg: SystemGraph = Body(...)):
-    return {"fractional_importance_traits": services.get_fractional_importance_traits(sg)}
+async def fractional_importance_traits(rq: RequestBody = Body(...)):
+    return {"fractional_importance_traits": services.get_fractional_importance_traits(rq.system_graph, rq.data)}
 
 
 @app.get("/status")
 async def status():
     return {"health": "alive"}
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)

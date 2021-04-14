@@ -1,4 +1,3 @@
-from collections import namedtuple
 from typing import Dict
 
 from iscram.domain.model import SystemGraph
@@ -40,7 +39,7 @@ def get_bdd(sg: SystemGraph, repo: AbstractRepository):
 
 def get_risk(sg: SystemGraph, repo: AbstractRepository, data: Dict, prefs=None) -> float:
     bdd_with_root = get_bdd(sg, repo)
-    p = provide_p_direct_from_data(data)
+    p = provide_p_direct_from_data(sg, data)
     risk = risk_by_bdd(sg, p, bdd_with_root=bdd_with_root)
     return risk
 
@@ -106,7 +105,8 @@ def get_birnbaum_structural_importances_select(sg: SystemGraph, selector, repo: 
     return {name: result["select"]}
 
 
-def get_fractional_importance_traits(sg: SystemGraph, data: Dict, prefs=None):
+def get_fractional_importance_traits(sg: SystemGraph, data: Dict, prefs=None) -> Dict[str, float]:
     prefs = apply_prefs(prefs)
     result = fractional_importance_of_attributes(sg, data)
+    result = {"{}_{}".format(key[0], key[1]) : value for key, value in result.items()}
     return apply_scaling(result, prefs["SCALE_METRICS"])

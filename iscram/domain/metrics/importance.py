@@ -1,4 +1,5 @@
 from collections import Counter
+from typing import Dict
 
 from iscram.domain.model import (
     SystemGraph, DataValidationError
@@ -39,7 +40,7 @@ def birnbaum_importance(sg: SystemGraph, p, bdd_with_root=None, select=None):
     return b_imps
 
 
-def fractional_importance_of_attributes(sg: SystemGraph, data, error_on_missing_data=False):
+def fractional_importance_of_attributes(sg: SystemGraph, data, error_on_missing_data=False) -> Dict[str, float]:
     all_attributes = []
 
     try:
@@ -56,6 +57,6 @@ def fractional_importance_of_attributes(sg: SystemGraph, data, error_on_missing_
 
     counts = Counter(all_attributes)
     total = sum(counts.values())
-    f_imps = {a: (counts[a] / total) for a in all_attributes}
+    f_imps = {(key, value): (counts[(key, value)] / total) for key, value in all_attributes}
 
     return f_imps
