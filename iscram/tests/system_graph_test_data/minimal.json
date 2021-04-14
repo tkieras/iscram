@@ -1,0 +1,13 @@
+{
+  "nodes": {
+    "x1": {"tags":  ["component"], "logic": {"component": "and"}},
+    "x2": {"tags":  ["component"], "logic": {"component": "and"}},
+    "x3": {"tags":  ["component"], "logic": {"component": "and"}},
+    "indicator": {"tags": ["indicator"], "logic": {"component": "and"}}
+  },
+  "edges": [
+    {"src": "x1", "dst": "x3"},
+    {"src": "x2", "dst": "x3"},
+    {"src": "x3", "dst": "indicator"}
+  ]
+}

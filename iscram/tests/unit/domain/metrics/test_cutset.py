@@ -4,9 +4,7 @@ from iscram.domain.metrics.cutset import (
     mocus, probability_union, minimize_cutsets, brute_force_bdd_cutsets
 )
 
-from iscram.domain.model import (
-    Component, Supplier, Indicator, RiskRelation, SystemGraph
-)
+from iscram.domain.model import SystemGraph
 
 
 @pytest.mark.parametrize("x,expected", (
@@ -18,116 +16,33 @@ def test_probability_union(x, expected):
     assert pytest.approx(probability_union(x) == expected)
 
 
-def test_mocus_success_simple_and(simple_and: SystemGraph):
-    expected = frozenset([frozenset(["one", "two"]), frozenset(["three"])])
-    cutsets = mocus(simple_and)
+def test_mocus_success_minimal(minimal: SystemGraph):
+    expected = frozenset([frozenset(["x1", "x2"]), frozenset(["x3"])])
+    cutsets = mocus(minimal)
     assert cutsets == expected
 
 
-def test_mocus_success_simple_or(simple_or: SystemGraph):
-    expected = frozenset([frozenset(["one"]), frozenset(["two"]), frozenset(["three"])])
-    cutsets = mocus(simple_or)
-    assert cutsets == expected
-
-
-def test_mocus_simple_supplier_success():
-    components = frozenset({Component("one", "and"), Component("two", "and"), Component("three", "and")})
-
-    indicator = Indicator("and", frozenset({RiskRelation("three", "indicator")}))
-
-    deps = frozenset({RiskRelation("one", "three"), RiskRelation("two", "three"),
-                      RiskRelation("eleven", "one"),
-                      RiskRelation("twelve", "two"),
-                      RiskRelation("thirteen", "three")})
-
-    suppliers = frozenset({Supplier("eleven"), Supplier("twelve"), Supplier("thirteen")})
-
-    offerings = frozenset()
-
-    sg = SystemGraph("simple", components, suppliers, deps, offerings, indicator)
-
-    expected = frozenset([
-                    frozenset(["three"]), frozenset(["one", "two"]), frozenset(["thirteen"]),
-                    frozenset(["one", "twelve"]), frozenset(["two", "eleven"]), frozenset(["eleven", "twelve"])
-    ])
-    cutsets = mocus(sg, ignore_suppliers=False)
-
-    assert cutsets == expected
+def test_mocus_diamond(diamond: SystemGraph):
+    expected = frozenset([frozenset(["x1"]), frozenset(["x2"]), frozenset(["x3"])])
+    assert mocus(diamond) == expected
 
 
 def test_mocus_canonical(canonical: SystemGraph):
-    expected = frozenset([frozenset(["one"]),
-                          frozenset(["two", "five"]),
-                          frozenset(["three", "five"]),
-                          frozenset(["four", "five"]),
-                          frozenset(["eight", "nine", "five"]),
-                          frozenset(["two", "six"]),
-                          frozenset(["three", "six"]),
-                          frozenset(["four", "six"]),
-                          frozenset(["eight", "nine", "six"]),
-                          frozenset(["two", "seven"]),
-                          frozenset(["three", "seven"]),
-                          frozenset(["four", "seven"]),
-                          frozenset(["eight", "nine", "seven"])])
+    expected = frozenset([frozenset(["x1"]),
+                         frozenset(["x2", "x5"]),
+                         frozenset(["x3", "x5"]),
+                         frozenset(["x4", "x5"]),
+                         frozenset(["x8", "x9", "x5"]),
+                         frozenset(["x2", "x6"]),
+                         frozenset(["x3", "x6"]),
+                         frozenset(["x4", "x6"]),
+                         frozenset(["x8", "x9", "x6"]),
+                         frozenset(["x2", "x7"]),
+                         frozenset(["x3", "x7"]),
+                         frozenset(["x4", "x7"]),
+                         frozenset(["x8", "x9", "x7"])])
 
     cutsets = mocus(canonical)
-    assert cutsets == expected
-
-
-def test_mocus_simple_non_tree(non_tree_simple_and: SystemGraph):
-    cutsets = mocus(non_tree_simple_and)
-    expected = frozenset([frozenset(["three"]), frozenset(["one", "two"]), frozenset(["four"])])
-    assert cutsets == expected
-
-
-def test_mocus_complex_non_tree():
-    components = frozenset([
-        Component("one", "and"),
-        Component("two", "and"),
-        Component("three", "and"),
-        Component("four", "or"),
-        Component("five", "or"),
-        Component("six", "or"),
-        Component("seven", "or"),
-        Component("eight", "or"),
-        Component("nine", "or"),
-        Component("ten", "or")
-    ])
-
-    deps = frozenset([
-        RiskRelation("ten", "nine"),
-        RiskRelation("ten", "eight"),
-        RiskRelation("eight", "four"),
-        RiskRelation("eight", "six"),
-        RiskRelation("nine", "seven"),
-        RiskRelation("nine", "five"),
-        RiskRelation("four", "two"),
-        RiskRelation("six", "two"),
-        RiskRelation("seven", "three"),
-        RiskRelation("five", "three"),
-        RiskRelation("two", "one"),
-        RiskRelation("three", "one")
-    ])
-
-    indicator = Indicator("and", frozenset([RiskRelation("one", "indicator")]))
-    suppliers = frozenset()
-    offerings = frozenset()
-    sg = SystemGraph("complex_or_nontree", components, suppliers, deps, offerings, indicator)
-
-    cutsets = mocus(sg)
-    expected = frozenset([
-        frozenset(["one"]),
-        frozenset(["two", "three"]),
-        frozenset(["four", "six", "seven", "five"]),
-        frozenset(["eight", "nine"]),
-        frozenset(["ten"]),
-        frozenset(["eight", "three"]),
-        frozenset(["nine", "two"]),
-        frozenset(["four", "six", "three"]),
-        frozenset(["four", "six", "nine"]),
-        frozenset(["seven", "five", "eight"]),
-        frozenset(["seven", "five", "two"])
-    ])
     assert cutsets == expected
 
 
@@ -147,69 +62,19 @@ def test_minimize_cutsets():
 
 
 def test_brute_force_bdd_cutsets(canonical: SystemGraph):
-    expected = frozenset([frozenset(["one"]),
-                          frozenset(["two", "five"]),
-                          frozenset(["three", "five"]),
-                          frozenset(["four", "five"]),
-                          frozenset(["eight", "nine", "five"]),
-                          frozenset(["two", "six"]),
-                          frozenset(["three", "six"]),
-                          frozenset(["four", "six"]),
-                          frozenset(["eight", "nine", "six"]),
-                          frozenset(["two", "seven"]),
-                          frozenset(["three", "seven"]),
-                          frozenset(["four", "seven"]),
-                          frozenset(["eight", "nine", "seven"])])
+    expected = frozenset([frozenset(["x1"]),
+                          frozenset(["x2", "x5"]),
+                          frozenset(["x3", "x5"]),
+                          frozenset(["x4", "x5"]),
+                          frozenset(["x8", "x9", "x5"]),
+                          frozenset(["x2", "x6"]),
+                          frozenset(["x3", "x6"]),
+                          frozenset(["x4", "x6"]),
+                          frozenset(["x8", "x9", "x6"]),
+                          frozenset(["x2", "x7"]),
+                          frozenset(["x3", "x7"]),
+                          frozenset(["x4", "x7"]),
+                          frozenset(["x8", "x9", "x7"])])
 
     assert brute_force_bdd_cutsets(canonical) == expected
 
-
-def test_brute_force_bdd_complex_non_tree():
-    components = frozenset([
-        Component("one", "and"),
-        Component("two", "and"),
-        Component("three", "and"),
-        Component("four", "or"),
-        Component("five", "or"),
-        Component("six", "or"),
-        Component("seven", "or"),
-        Component("eight", "or"),
-        Component("nine", "or"),
-        Component("ten", "or")
-    ])
-
-    deps = frozenset([
-        RiskRelation("ten", "nine"),
-        RiskRelation("ten", "eight"),
-        RiskRelation("eight", "four"),
-        RiskRelation("eight", "six"),
-        RiskRelation("nine", "seven"),
-        RiskRelation("nine", "five"),
-        RiskRelation("four", "two"),
-        RiskRelation("six", "two"),
-        RiskRelation("seven", "three"),
-        RiskRelation("five", "three"),
-        RiskRelation("two", "one"),
-        RiskRelation("three", "one")
-    ])
-
-    indicator = Indicator("and", frozenset([RiskRelation("one", "indicator")]))
-    suppliers = frozenset()
-    offerings = frozenset()
-    sg = SystemGraph("complex_or_nontree", components, suppliers, deps, offerings, indicator)
-
-    cutsets = brute_force_bdd_cutsets(sg)
-    expected = frozenset([
-        frozenset(["one"]),
-        frozenset(["two", "three"]),
-        frozenset(["four", "six", "seven", "five"]),
-        frozenset(["eight", "nine"]),
-        frozenset(["ten"]),
-        frozenset(["eight", "three"]),
-        frozenset(["nine", "two"]),
-        frozenset(["four", "six", "three"]),
-        frozenset(["four", "six", "nine"]),
-        frozenset(["seven", "five", "eight"]),
-        frozenset(["seven", "five", "two"])
-    ])
-    assert cutsets == expected

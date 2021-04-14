@@ -22,38 +22,24 @@ class FakeRepository(AbstractRepository):
         self.storage = {}
 
     def get(self, sg: SystemGraph, resource_identifier: str):
-        if resource_identifier == "cutsets":
-            key = sg.structure()
-        else:
-            key = sg
 
         try:
-            result = self.storage[key][resource_identifier]
+            result = self.storage[sg][resource_identifier]
         except KeyError:
             result = None
 
         return result
 
     def put(self, sg: SystemGraph, resource_identifier: str, data):
-        if resource_identifier == "cutsets":
-            key = sg.structure()
-        else:
-            key = sg
+        if sg not in self.storage:
+            self.storage[sg] = {}
 
-        if key not in self.storage:
-            self.storage[key] = {}
-
-        self.storage[key][resource_identifier] = data
+        self.storage[sg][resource_identifier] = data
 
     def delete(self, sg: SystemGraph, resource_identifier: str):
-        if resource_identifier == "cutsets":
-            key = sg.structure()
-        else:
-            key = sg
-
         try:
-            self.storage[key][resource_identifier]
+            self.storage[sg][resource_identifier]
         except KeyError:
             return None
 
-        self.storage[key].pop(resource_identifier)
+        self.storage[sg].pop(resource_identifier)

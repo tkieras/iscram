@@ -1,236 +1,55 @@
 from iscram.domain.model import (
-    Component, Supplier, Indicator, RiskRelation,
-    Offering, SystemGraph, apply_singular_offerings
+    Node, Edge, SystemGraph, validate_data
 )
 
 
-def test_empty_sg():
-    sg = SystemGraph("test", frozenset(), frozenset(), frozenset(), frozenset(), Indicator("and", frozenset()))
+def test_minimal(minimal: SystemGraph):
+    minimal.self_validate()
 
-    assert sg.valid_values()
 
+def test_diamond(diamond: SystemGraph):
+    diamond.self_validate()
 
-def test_full_sg(full_example: SystemGraph):
-    assert full_example.valid_values()
 
+def test_diamond_suppliers(diamond_suppliers: SystemGraph):
+    diamond_suppliers.self_validate()
 
-def test_mismatched_indicator():
-    components = frozenset([Component("x" + str(i)) for i in range(10)])
 
-    suppliers = frozenset([Supplier("x" + str(i)) for i in range(10, 20)])
+# Tests for System Graph Hashing
+def test_sg_hashable(minimal: SystemGraph):
+    assert hash(minimal)
 
-    indicator = Indicator("and", frozenset([RiskRelation("x" + str(i), "indicator") for i in {10, 15, 35}]))
 
-    offerings = frozenset({Offering("x15", "x5", 0.5, 30), Offering("x16", "x5", 0.5, 30), Offering("x17", "x3", 0.5, 30)})
+def test_sg_hash_very_different(minimal: SystemGraph, diamond: SystemGraph):
+    assert hash(minimal) != hash(diamond)
 
-    deps = frozenset({RiskRelation("x1", "x3"), RiskRelation("x2", "x3"), RiskRelation("x5", "x6")})
 
-    sg = SystemGraph("test", components, suppliers, deps, offerings, indicator)
+def test_sg_hash_very_close_node_missing(minimal: SystemGraph):
+    pre = hash(minimal)
+    del minimal.nodes["x1"]
+    assert pre != hash(minimal)
 
-    assert not sg.valid_values()
 
+def test_sg_hash_very_close_extra_node(minimal: SystemGraph):
+    pre = hash(minimal)
+    minimal.nodes["new"] = Node()
+    assert pre != hash(minimal)
 
-def test_mismatched_offerings():
-    components = frozenset([Component("x" + str(i)) for i in range(10)])
+# Tests for model validation errors
 
-    suppliers = frozenset([Supplier("x" + str(i)) for i in range(10, 20)])
+# Tests for data validation errors
 
-    indicator = Indicator("and", frozenset([RiskRelation("x" + str(i), "indicator") for i in {1, 2, 3}]))
 
-    offerings = frozenset({Offering("x15", "x300", 0.5, 30), Offering("x413", "x5", 0.5, 30), Offering("x17", "x3", 0.5, 30)})
-
-    deps = frozenset({RiskRelation("x1", "x3"), RiskRelation("x2", "x3"), RiskRelation("x5", "x6")})
-
-    sg = SystemGraph("test", components, suppliers, deps, offerings, indicator)
-
-    assert not sg.valid_values()
-
-
-def test_mismatched_deps():
-    components = frozenset([Component("x" + str(i)) for i in range(10)])
-
-    suppliers = frozenset([Supplier("x" + str(i)) for i in range(10, 20)])
-
-    indicator = Indicator("and", frozenset([RiskRelation("x" + str(i), "indicator") for i in {1, 2, 3}]))
-
-    offerings = frozenset({Offering("x15", "x5", 0.5, 30), Offering("x16", "x5", 0.5, 30), Offering("x17", "x3", 0.5, 30)})
-
-    deps = frozenset({RiskRelation("x100", "x3"), RiskRelation("x23", "x3"), RiskRelation("x5", "x6")})
-
-    sg = SystemGraph("test", components, suppliers, deps, offerings, indicator)
-
-    assert not sg.valid_values()
-
-
-def test_overlapping_ids():
-    components = frozenset([Component("x" + str(i)) for i in range(10)])
-
-    suppliers = frozenset([Supplier("x" + str(i)) for i in range(15)])
-
-    indicator = Indicator("and", frozenset([RiskRelation("x" + str(i), "indicator") for i in {1, 2, 3}]))
-
-    offerings = frozenset({Offering("x15", "x5", 0.5, 30), Offering("x16", "x5", 0.5, 30), Offering("x17", "x3", 0.5, 30)})
-
-    deps = frozenset({RiskRelation("x1", "x3"), RiskRelation("x2", "x3"), RiskRelation("x5", "x6")})
-
-    sg = SystemGraph("test", components, suppliers, deps, offerings, indicator)
-
-    assert not sg.valid_values()
-
-
-def test_internally_overlapping_ids():
-    components = set([Component("x" + str(i)) for i in range(10)])
-
-    components.add(Component("x3", risk=0.4342))
-
-    components = frozenset(components)
-
-    suppliers = frozenset([Supplier("x" + str(i)) for i in range(10, 20)])
-
-    indicator = Indicator("and", frozenset([RiskRelation("x" + str(i), "indicator") for i in {1, 2, 3}]))
-
-    offerings = frozenset({Offering("x15", "x5", 0.5, 30), Offering("x16", "x5", 0.5, 30), Offering("x17", "x3", 0.5, 30)})
-
-    deps = frozenset({RiskRelation("x1", "x3"), RiskRelation("x2", "x3"), RiskRelation("x5", "x6")})
-
-    sg = SystemGraph("test", components, suppliers, deps, offerings, indicator)
-
-    assert not sg.valid_values()
-
-
-def test_hash_equal():
-    components = frozenset([Component("x" + str(i)) for i in range(10)])
-
-    suppliers = frozenset([Supplier("x" + str(i)) for i in range(10, 20)])
-
-    indicator = Indicator("and", frozenset([RiskRelation("x" + str(i), "indicator") for i in {1, 2, 3}]))
-
-    offerings = frozenset({Offering("x15", "x5", 0.5, 30), Offering("x16", "x5", 0.5, 30), Offering("x17", "x3", 0.5, 30)})
-
-    deps = frozenset({RiskRelation("x1", "x3"), RiskRelation("x2", "x3"), RiskRelation("x5", "x6")})
-
-    sg = SystemGraph("test", components, suppliers, deps, offerings, indicator)
-
-    components_2 = frozenset([Component("x" + str(i)) for i in range(10)])
-
-    suppliers_2 = frozenset([Supplier("x" + str(i)) for i in range(10, 20)])
-
-    indicator_2 = Indicator("and", frozenset([RiskRelation("x" + str(i), "indicator") for i in {1, 2, 3}]))
-
-    offerings_2 = frozenset({Offering("x15", "x5", 0.5, 30), Offering("x16", "x5", 0.5, 30), Offering("x17", "x3", 0.5, 30)})
-
-    deps_2 = frozenset({RiskRelation("x1", "x3"), RiskRelation("x2", "x3"), RiskRelation("x5", "x6")})
-
-    sg_2 = SystemGraph("test", components_2, suppliers_2, deps_2, offerings_2, indicator_2)
-
-    assert id(sg) != id(sg_2)
-    assert hash(sg) == hash(sg_2)
-
-
-def test_hash_not_equal():
-    components = frozenset([Component("x" + str(i)) for i in range(10)])
-
-    suppliers = frozenset([Supplier("x" + str(i)) for i in range(10, 20)])
-
-    indicator = Indicator("and", frozenset([RiskRelation("x" + str(i), "indicator") for i in {1, 2, 3}]))
-
-    offerings = frozenset({Offering("x15", "x5", 0.5, 30), Offering("x16", "x5", 0.5, 30), Offering("x17", "x3", 0.5, 30)})
-
-    deps = frozenset({RiskRelation("x1", "x3"), RiskRelation("x2", "x3"), RiskRelation("x5", "x6")})
-
-    sg = SystemGraph("test", components, suppliers, deps, offerings, indicator)
-
-    components_2 = frozenset([Component("x" + str(i)) for i in range(10)])
-
-    suppliers_2 = frozenset([Supplier("x" + str(i)) for i in range(10, 20)])
-
-    indicator_2 = Indicator("and", frozenset([RiskRelation("x" + str(i), "indicator") for i in {1, 2, 3}]))
-
-    offerings_2 = frozenset({Offering("x15", "x5", 0.49, 30), Offering("x16", "x5", 0.5, 30), Offering("x17", "x3", 0.5, 30)})
-
-    deps_2 = frozenset({RiskRelation("x1", "x3"), RiskRelation("x2", "x3"), RiskRelation("x5", "x6")})
-
-    sg_2 = SystemGraph("test", components_2, suppliers_2, deps_2, offerings_2, indicator_2)
-
-    assert id(sg) != id(sg_2)
-    assert hash(sg) != hash(sg_2)
-
-
-def test_structure_equal():
-    components = frozenset([Component("x" + str(i)) for i in range(10)])
-
-    suppliers = frozenset([Supplier("x" + str(i)) for i in range(10, 20)])
-
-    indicator = Indicator("and", frozenset([RiskRelation("x" + str(i), "indicator") for i in {1, 2, 3}]))
-
-    offerings = frozenset({Offering("x15", "x5", 0.5, 30), Offering("x16", "x5", 0.5, 30), Offering("x17", "x3", 0.5, 30)})
-
-    deps = frozenset({RiskRelation("x1", "x3"), RiskRelation("x2", "x3"), RiskRelation("x5", "x6")})
-
-    sg = SystemGraph("test", components, suppliers, deps, offerings, indicator)
-
-    components_2 = frozenset([Component("x" + str(i)) for i in range(10)])
-
-    suppliers_2 = frozenset([Supplier("x" + str(i)) for i in range(10, 20)])
-
-    indicator_2 = Indicator("and", frozenset([RiskRelation("x" + str(i), "indicator") for i in {1, 2, 3}]))
-
-    offerings_2 = frozenset({Offering("x15", "x5", 0.49, 30), Offering("x16", "x5", 0.5, 30), Offering("x17", "x3", 0.5, 30)})
-
-    deps_2 = frozenset({RiskRelation("x1", "x3"), RiskRelation("x2", "x3"), RiskRelation("x5", "x6")})
-
-    sg_2 = SystemGraph("test", components_2, suppliers_2, deps_2, offerings_2, indicator_2)
-
-    assert id(sg) != id(sg_2)
-    assert sg != sg_2
-    assert hash(sg) != hash(sg_2)
-    assert sg.structure() == sg_2.structure()
-
-
-def test_structure_unequal():
-    components = frozenset([Component("x" + str(i)) for i in range(10)])
-
-    suppliers = frozenset([Supplier("x" + str(i)) for i in range(10, 20)])
-
-    indicator = Indicator("and", frozenset([RiskRelation("x" + str(i), "indicator") for i in {1, 2, 3}]))
-
-    offerings = frozenset({Offering("x15", "x5", 0.5, 30), Offering("x16", "x5", 0.5, 30), Offering("x17", "x3", 0.5, 30)})
-
-    deps = frozenset({RiskRelation("x1", "x3"), RiskRelation("x2", "x3"), RiskRelation("x5", "x6")})
-
-    sg = SystemGraph("test", components, suppliers, deps, offerings, indicator)
-
-    components_2 = frozenset([Component("x" + str(i)) for i in range(10)])
-
-    suppliers_2 = frozenset([Supplier("x" + str(i)) for i in range(10, 20)])
-
-    indicator_2 = Indicator("and", frozenset([RiskRelation("x" + str(i), "indicator") for i in {1, 2, 3}]))
-
-    offerings_2 = frozenset({Offering("x15", "x5", 0.5, 30), Offering("x16", "x5", 0.5, 30), Offering("x17", "x3", 0.5, 30)})
-
-    deps_2 = frozenset({RiskRelation("x1", "x3"), RiskRelation("x2", "x3"), RiskRelation("x5", "x6"), RiskRelation("x15", "x3")})
-
-    sg_2 = SystemGraph("test", components_2, suppliers_2, deps_2, offerings_2, indicator_2)
-
-    assert id(sg) != id(sg_2)
-    assert sg != sg_2
-    assert hash(sg) != hash(sg_2)
-    assert sg.structure() != sg_2.structure()
-
-
-def test_apply_singular_offerings_basic(simple_and_suppliers: SystemGraph):
-    assert simple_and_suppliers.valid_values()
-
-    dep_count = len(simple_and_suppliers.security_dependencies)
-
-    updated = apply_singular_offerings(simple_and_suppliers)
-
-    assert updated.valid_values()
-
-    updated_dep_count = len(updated.security_dependencies)
-
-    assert dep_count + 3 == updated_dep_count
-
-    c_1 = list(filter(lambda c: c.identifier == "one", updated.components))[0]
-
-    assert c_1.risk == 0.25
+def test_load_from_dict():
+    d = {
+        "nodes": {
+            "indicator": {"tags": {"indicator"}, "logic": {"component": "and"}},
+            "x1" : {"tags": {"component"}, "logic": {"component": "and"}},
+            "x2": {"tags": {"component"}, "logic": {"component": "and"}}
+        },
+        "edges": [
+            {"src": "x1", "dst": "x2"}
+        ]
+    }
+    sg = SystemGraph(**d)
+    sg.self_validate()

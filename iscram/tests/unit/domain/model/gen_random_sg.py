@@ -1,12 +1,10 @@
 import random
-
-from iscram.domain.model import (
-    SystemGraph, Component, RiskRelation, Indicator
-)
-from iscram.adapters.json import dump_system_graph_json_str
+import json
+from typing import Dict
+from iscram.domain.model import SystemGraph
 
 
-def gen_random_tree(n, save=False):
+def gen_random_tree(n, save=False, generate_data=True) -> (SystemGraph, Dict):
     def rand_logic():
         return random.choice(["and", "or"])
 
@@ -20,35 +18,38 @@ def gen_random_tree(n, save=False):
     random.shuffle(unused)
 
     used = ["indicator"]
-    nodes = {"indicator"}
-    edges = set()
+    nodes = {"indicator": {"tags": ["indicator"], "logic": {"component": rand_logic()}}}
+    edges = []
 
     while unused:
-        child = unused.pop(0)
-        parent = random.choice(used)
-        nodes.add(child)
-        edges.add((child, parent))
-        used.append(child)
+        child_id = unused.pop(0)
+        parent_id = random.choice(used)
+        nodes[child_id] = {"tags": ["component"], "logic": {"component": rand_logic()}}
+        edges.append({"src": child_id, "dst": parent_id})
+        used.append(child_id)
 
-    nodes.remove("indicator")
-    ind_edges = list(filter(lambda e: e[1] == "indicator", edges))
-    for edge in ind_edges:
-        edges.remove(edge)
+    sg_dict = {
+        "nodes": nodes,
+        "edges": edges
+    }
 
-    indicator = Indicator(rand_logic(), frozenset([RiskRelation(*edge) for edge in ind_edges]))
-
-    components = frozenset([Component(node, rand_logic(), rand_risk(), rand_cost()) for node in nodes])
-
-    deps = frozenset([RiskRelation(*edge) for edge in edges])
-
-    sg = SystemGraph("rand_tree", components, frozenset(), deps, frozenset(), indicator)
+    data_dict = None
+    if generate_data:
+        data_dict = {
+            node: {"risk": rand_risk()} for node in nodes.keys()
+        }
+        data_dict["indicator"]["risk"] = 0
 
     if save:
-        with open("random_tree_{}.json".format(n), "w") as outfile:
-            outfile.write(dump_system_graph_json_str(sg))
+        filename = "rand_system_graph_tree_{}".format(n)
+        with open(filename+".json", "w") as outfile:
+            json.dump(sg_dict, outfile, indent=4)
+        if data_dict is not None:
+            with open(filename+"_data.json", "w") as outfile:
+                json.dump(data_dict, outfile, indent=4)
 
-    return sg
+    return SystemGraph(**sg_dict), data_dict
 
 
 if __name__ == "__main__":
-    gen_random_tree(50, True)
+    gen_random_tree(500, True, False)

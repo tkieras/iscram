@@ -1,15 +1,18 @@
 from collections import namedtuple
+from typing import Dict
 
 from iscram.domain.model import SystemGraph
 from iscram.adapters.repository import AbstractRepository
 from iscram.domain.metrics.risk import risk_by_bdd
 from iscram.domain.metrics.bdd_functions import build_bdd
 from iscram.domain.metrics.importance import (
-    birnbaum_importance, birnbaum_structural_importance, fractional_importance_traits
+    birnbaum_importance, birnbaum_structural_importance, fractional_importance_of_attributes
+)
+from iscram.domain.metrics.probability_providers import (
+    provide_p_unknown_data, provide_p_direct_from_data
 )
 from iscram.domain.metrics.scale import apply_scaling
 
-selector = namedtuple("selector", ["key", "value"])
 
 DEFAULT_PREFERENCES = {
     "SCALE_METRICS": "MIN_MAX",
@@ -17,9 +20,12 @@ DEFAULT_PREFERENCES = {
 }
 
 
-def apply_prefs(user):
+def apply_prefs(user_prefs):
     prefs = DEFAULT_PREFERENCES.copy()
-    prefs.update(user)
+    if user_prefs is None:
+        return prefs
+    else:
+        prefs.update(user_prefs)
     return prefs
 
 
@@ -32,89 +38,75 @@ def get_bdd(sg: SystemGraph, repo: AbstractRepository):
     return bdd_with_root
 
 
-def get_risk(sg: SystemGraph, repo: AbstractRepository, prefs={}):
-    result = repo.get(sg, "risk")
-    if result is not None:
-        return result
-
+def get_risk(sg: SystemGraph, repo: AbstractRepository, data: Dict, prefs=None) -> float:
     bdd_with_root = get_bdd(sg, repo)
-
-    risk = risk_by_bdd(sg, bdd_with_root=bdd_with_root)
-    repo.put(sg, "risk", risk)
+    p = provide_p_direct_from_data(data)
+    risk = risk_by_bdd(sg, p, bdd_with_root=bdd_with_root)
     return risk
 
 
-def get_birnbaum_structural_importances(sg: SystemGraph, repo: AbstractRepository, prefs={}):
+def get_birnbaum_structural_importances(sg: SystemGraph, repo: AbstractRepository, data=None, prefs=None) -> Dict[str, float]:
+    prefs = apply_prefs(prefs)
+    bdd_with_root = get_bdd(sg, repo)
+    result = birnbaum_structural_importance(sg, bdd_with_root=bdd_with_root)
+    return apply_scaling(result, prefs["SCALE_METRICS"])
+
+
+def get_birnbaum_importances(sg: SystemGraph, repo: AbstractRepository, data: Dict, prefs=None) -> Dict[str, float]:
+    prefs = apply_prefs(prefs)
+    bdd_with_root = get_bdd(sg, repo)
+    p = provide_p_direct_from_data(sg, data)
+    result = birnbaum_importance(sg, p, bdd_with_root=bdd_with_root)
+    return apply_scaling(result, prefs["SCALE_METRICS"])
+
+
+def get_birnbaum_importances_select(sg: SystemGraph, selector: Dict, repo: AbstractRepository, data: Dict, prefs=None) -> Dict[str, float]:
     prefs = apply_prefs(prefs)
 
-    result = repo.get(sg, "birnbaum_structural_importances")
+    select_key = list(selector.keys())
+    if len(select_key) != 1:
+        return {}
+    select_key = select_key[0]
+    select_value = selector[select_key]
+    select = []
 
-    if result is None:
-        bdd_with_root = get_bdd(sg, repo)
-        result = birnbaum_structural_importance(sg, bdd_with_root=bdd_with_root)
-        repo.put(sg, "birnbaum_structural_importances", result)
+    for node, node_data in data["nodes"].items():
+        if "attributes" not in node_data:
+            continue
+        attrs = node_data["attributes"]
 
-    result = apply_scaling(result, prefs["SCALE_METRICS"])
+        if select_key in attrs and attrs[select_key] == select_value:
+            select.append(node)
 
-    return result
+    bdd_with_root = get_bdd(sg, repo)
+    p = provide_p_direct_from_data(sg, data)
+    result = birnbaum_importance(sg, p, bdd_with_root=bdd_with_root, select=select)
 
+    name = "birnbaum_importances_select_{}_{}".format(select_key, select_value)
 
-def get_birnbaum_importances(sg: SystemGraph, repo: AbstractRepository, prefs={}):
-    prefs = apply_prefs(prefs)
-
-    result = repo.get(sg, "birnbaum_importances")
-
-    if result is None:
-        bdd_with_root = get_bdd(sg, repo)
-        result = birnbaum_importance(sg, bdd_with_root=bdd_with_root)
-        repo.put(sg, "birnbaum_importances", result)
-
-    result = apply_scaling(result, prefs["SCALE_METRICS"])
-
-    return result
+    return {name: result["select"]}
 
 
-def get_birnbaum_importances_select(sg: SystemGraph, selector, repo: AbstractRepository, prefs={}):
+def get_birnbaum_structural_importances_select(sg: SystemGraph, selector, repo: AbstractRepository, data: Dict, prefs=None) -> Dict[str, float]:
     prefs = apply_prefs(prefs)
 
     select = []
 
-    for n in sg.suppliers:
-        attributes = {a.key: a.value for a in n.traits}
-        if selector.key in attributes and attributes[selector.key] == selector.value:
-            select.append(n.identifier)
+    for node, node_data in data["nodes"].items():
+        if "attributes" in node_data:
+            attributes = {a.key: a.value for a in node_data["attributes"]}
+            if selector.key in attributes and attributes[selector.key] == selector.value:
+                select.append(node)
 
     bdd_with_root = get_bdd(sg, repo)
-    result = birnbaum_importance(sg, bdd_with_root=bdd_with_root, select=select)
+    result = birnbaum_structural_importance(sg, bdd_with_root=bdd_with_root, select=select)
 
     name = "birnbaum_importances_select_{}_{}".format(selector.key, selector.value)
 
     return {name: result["select"]}
 
 
-def get_birnbaum_structural_importances_select(sg: SystemGraph, selector, repo: AbstractRepository, prefs={}):
+def get_fractional_importance_traits(sg: SystemGraph, data: Dict, prefs=None):
     prefs = apply_prefs(prefs)
-
-    select = []
-
-    for n in sg.suppliers:
-        attributes = {a.key: a.value for a in n.traits}
-        if selector.key in attributes and attributes[selector.key] == selector.value:
-            select.append(n.identifier)
-
-    bdd_with_root = get_bdd(sg, repo)
-    result = birnbaum_structural_importance(sg, bdd_with_root=bdd_with_root, select=select)
-
-    name = "birnbaum_structural_importances_select_{}_{}".format(selector.key, selector.value)
-
-    return {name: result["select"]}
-
-
-def get_fractional_importance_traits(sg: SystemGraph, prefs={}):
-    prefs = apply_prefs(prefs)
-
-    result = fractional_importance_traits(sg)
-
-    result = apply_scaling(result, prefs["SCALE_METRICS"])
-
-    return  result
+    result = fractional_importance_of_attributes(sg, data)
+    return apply_scaling(result, prefs["SCALE_METRICS"])

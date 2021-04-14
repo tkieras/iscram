@@ -1,14 +1,11 @@
+from typing import FrozenSet, Dict, List
 from dataclasses import field
-from typing import FrozenSet
-from collections import defaultdict
 
 from pydantic.dataclasses import dataclass
 
 
 def validate_identifier(identifier: str) -> bool:
     if len(identifier) == 0:
-        return False
-    if identifier == "indicator":
         return False
     return identifier[0].isalpha()
 
@@ -25,155 +22,96 @@ def validate_cost(cost: int) -> bool:
     return cost >= 0
 
 
-@dataclass(frozen=True)
-class Component:
-    identifier: str
-    logic_function: str = "and"
-    risk: float = 0.0
-    cost: int = 0
+class ModelValidationError(Exception):
+    pass
 
-    def valid_values(self):
-        return all([validate_identifier(self.identifier),
-                    validate_logic_function(self.logic_function),
-                    validate_risk(self.risk),
-                    validate_cost(self.cost)])
+
+class DataValidationError(Exception):
+    pass
 
 
 @dataclass(frozen=True)
-class Trait:
-    key: str
-    value: bool
+class Node:
+    logic: Dict = field(default_factory=dict)
+    tags: FrozenSet[str] = field(default_factory=frozenset)
+
+    def __hash__(self):
+        return hash((self.tags, frozenset([(k, v) for k, v in self.logic.items()])))
+
+    def __str__(self):
+        return "{} {}".format(self.tags, self.logic)
+
+    def self_validate(self) -> None:
+        for key, value in self.logic.items():
+            if not validate_logic_function(value):
+                raise ModelValidationError("Invalid logic value in node: {}".format(self))
+        if "component" in self.tags and "component" not in self.logic:
+            raise ModelValidationError("Missing component logic function for node: {}".format(self))
+        if not ("component" in self.tags or "supplier" in self.tags or "indicator" in self.tags):
+            raise ModelValidationError("Missing tag (component/supplier/indicator) for node: {}".format(self))
+        if "component" in self.tags and "supplier" in self.tags:
+            raise ModelValidationError("A node is marked as both supplier and component: {}".format(self))
 
 
 @dataclass(frozen=True)
-class Supplier:
-    identifier: str
-    trust: float = 1.0
-    traits: FrozenSet[Trait] = field(default_factory=set)
+class Edge:
+    src: str
+    dst: str
+    tags: FrozenSet[str] = field(default_factory=frozenset)
 
-    def valid_values(self):
-        return all([validate_identifier(self.identifier),
-                    validate_risk(self.trust)])
-
-
-@dataclass(frozen=True)
-class Offering:
-    supplier_id: str
-    component_id: str
-    risk: float
-    cost: int
-
-    def valid_values(self):
-        return all([self.supplier_id != self.component_id,
-                    validate_risk(self.risk),
-                    validate_cost(self.cost)])
-
-
-@dataclass(frozen=True)
-class RiskRelation:
-    risk_src_id: str
-    risk_dst_id: str
-
-
-@dataclass(frozen=True)
-class Indicator:
-    logic_function: str
-    dependencies: FrozenSet[RiskRelation] = field(default_factory=set)
-
-    def valid_values(self):
-        return all([all([d.risk_dst_id == "indicator" for d in self.dependencies]),
-                    validate_logic_function(self.logic_function)])
+    def __str__(self):
+        return "{} {} {}".format(self.src, self.dst, self.tags)
 
 
 @dataclass(frozen=True)
 class SystemGraph:
-    name: str
-    components: FrozenSet[Component]
-    suppliers: FrozenSet[Supplier]
-    security_dependencies: FrozenSet[RiskRelation]
-    offerings: FrozenSet[Offering]
-    indicator: Indicator
+    nodes: Dict[str, Node]
+    edges: List[Edge]
 
-    def valid_values(self) -> bool:
-        parts = all([all([c.valid_values() for c in self.components]),
-                     all([s.valid_values() for s in self.suppliers]),
-                     all([o.valid_values() for o in self.offerings]),
-                     ])
+    def __hash__(self):
+        node_hash = hash(frozenset((k,v) for k,v in self.nodes.items()))
+        edge_hash = hash(frozenset(self.edges))
+        return node_hash * 37 + edge_hash
 
-        valid_supplier_ids = set([s.identifier for s in self.suppliers])
-        valid_component_ids = set([c.identifier for c in self.components])
-        all_ids = valid_component_ids.union(valid_supplier_ids)
-
-        valid_ids = all([len(self.components) == len(valid_component_ids),
-                         len(self.suppliers) == len(valid_supplier_ids),
-                         len(all_ids) == len(valid_component_ids) + len(valid_supplier_ids)])
-
-        whole = all([all([o.supplier_id in valid_supplier_ids for o in self.offerings]),
-                     all([o.component_id in valid_component_ids for o in self.offerings]),
-                     all([d.risk_src_id in all_ids for d in self.security_dependencies]),
-                     all([d.risk_dst_id in all_ids for d in self.security_dependencies]),
-                     all([d.risk_src_id in all_ids for d in self.indicator.dependencies])
-                     ])
-
-        return parts and whole and valid_ids
-
-    def structure(self) -> int:
-        graph = defaultdict(list)
-        for c in self.components:
-            graph[c].append(c.identifier)
-            graph[c].append(c.logic_function)
-
-        for s in self.suppliers:
-            graph[s].append(s.identifier)
-
-        for e in self.security_dependencies:
-            graph[e.risk_dst_id].append(e.risk_src_id)
-
-        structure = frozenset([tuple(entry) for entry in graph.values()])
-
-        return hash(structure)
+    def self_validate(self) -> None:
+        system_names = set()
+        roots = 0
+        for name, node in self.nodes.items():
+            node.self_validate()
+            if not validate_identifier(name):
+                raise ModelValidationError("Invalid name in node: {} {}".format(name, node))
+            if name in system_names:
+                raise ModelValidationError("Name of node is used more than once: {}".format(name))
+            system_names.add(name)
+            roots += ("indicator" in node.tags)
+        if roots != 1:
+            raise ModelValidationError("Exactly one node must be tagged with 'indicator'.")
+        for edge in self.edges:
+            if edge.src not in self.nodes or edge.dst not in self.nodes:
+                raise ModelValidationError("Could not find src or dst of edge: {}".format(edge))
 
 
-def apply_singular_offerings(original: SystemGraph) -> SystemGraph:
-    offering_map = {}
-    for o in original.offerings:
-        offerings_for_component = offering_map.get(o.component_id, [])
-        offerings_for_component.append(o)
-        offering_map[o.component_id] = offerings_for_component
+def validate_data(sg: SystemGraph, data: Dict) -> None:
+    """ A data dictionary is valid only for a particular SystemGraph """
 
-    component_map = {}
-    for c in original.components:
-        component_map[c.identifier] = c
+    # If node data is given, it must be valid and correspond to this System Graph
+    if "nodes" in data:
+        for key, value in data["nodes"]:
+            if key not in sg.nodes:
+                raise DataValidationError("Node name not in System Graph: {}".format(key))
+            if "risk" in value and not validate_risk(value["risk"]):
+                raise DataValidationError("Risk data is invalid for node: {} {}".format(key, value))
 
-    updated_dependencies = []
-    updated_components = []
-    old_components = set(original.components)
+    # If edges are described in data dict, edge data must be valid for this System Graph
+    if "edges" in data:
+        for edge in data["edges"]:
+            if "src" not in edge or "dst" not in edge:
+                raise DataValidationError("Edge data missing src or dst field: {}".format(edge))
+            if edge["src"] not in sg.nodes or edge["dst"] not in sg.nodes:
+                raise DataValidationError("Could not find src or dst of edge: {}".format(edge))
+            if "risk" in edge and not validate_risk(edge["risk"]):
+                raise DataValidationError("Risk is not valid for edge: {}".format(edge))
+            if "cost" in edge and not validate_cost(edge["cost"]):
+                raise DataValidationError("Cost is not valid for edge: {}".format(edge))
 
-    for component, offerings in offering_map.items():
-        if len(offerings) == 1:
-            offering = offerings[0]
-            old_component = component_map[component]
-            new_component = Component(component,
-                                      old_component.logic_function,
-                                      offering.risk,
-                                      offering.cost)
-            updated_components.append(new_component)
-            updated_dependencies.append(RiskRelation(offering.supplier_id, component))
-            old_components.remove(old_component)
 
-    # transfer unchanged components
-    for old_component in old_components:
-        updated_components.append(old_component)
-
-    updated_dependencies.extend(original.security_dependencies)
-
-    new_sg = SystemGraph(
-        original.name,
-        frozenset(updated_components),
-        original.suppliers,
-        frozenset(updated_dependencies),
-        original.offerings,
-        original.indicator
-    )
-
-    return new_sg
