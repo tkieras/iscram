@@ -1,6 +1,6 @@
 from typing import Dict
 
-from iscram.domain.model import SystemGraph
+from iscram.domain.model import SystemGraph, validate_data
 from iscram.adapters.repository import AbstractRepository
 from iscram.domain.metrics.risk import risk_by_bdd
 from iscram.domain.metrics.bdd_functions import build_bdd
@@ -37,11 +37,12 @@ def get_bdd(sg: SystemGraph, repo: AbstractRepository):
     return bdd_with_root
 
 
-def get_risk(sg: SystemGraph, repo: AbstractRepository, data: Dict, prefs=None) -> float:
+def get_risk(sg: SystemGraph, repo: AbstractRepository, data: Dict, prefs=None) -> Dict[str, float]:
     bdd_with_root = get_bdd(sg, repo)
+    validate_data(sg, data)
     p = provide_p_direct_from_data(sg, data)
     risk = risk_by_bdd(sg, p, bdd_with_root=bdd_with_root)
-    return risk
+    return {"system" : risk}
 
 
 def get_birnbaum_structural_importances(sg: SystemGraph, repo: AbstractRepository, data=None, prefs=None) -> Dict[str, float]:
@@ -51,15 +52,19 @@ def get_birnbaum_structural_importances(sg: SystemGraph, repo: AbstractRepositor
     return apply_scaling(result, prefs["SCALE_METRICS"])
 
 
-def get_birnbaum_importances(sg: SystemGraph, repo: AbstractRepository, data: Dict, prefs=None) -> Dict[str, float]:
+def get_birnbaum_importances(sg: SystemGraph, repo: AbstractRepository, data: Dict, data_src: str, prefs=None) -> Dict[str, float]:
     prefs = apply_prefs(prefs)
     bdd_with_root = get_bdd(sg, repo)
-    p = provide_p_direct_from_data(sg, data)
+    if data_src == "data":
+        p = provide_p_direct_from_data(sg, data)
+    else:
+        p = provide_p_unknown_data(sg)
+
     result = birnbaum_importance(sg, p, bdd_with_root=bdd_with_root)
     return apply_scaling(result, prefs["SCALE_METRICS"])
 
 
-def get_birnbaum_importances_select(sg: SystemGraph, selector: Dict, repo: AbstractRepository, data: Dict, prefs=None) -> Dict[str, float]:
+def get_birnbaum_importances_select(sg: SystemGraph, repo: AbstractRepository, data: Dict, selector: Dict, data_src: str, prefs=None) -> Dict[str, float]:
     prefs = apply_prefs(prefs)
 
     select_key = list(selector.keys())
@@ -78,31 +83,16 @@ def get_birnbaum_importances_select(sg: SystemGraph, selector: Dict, repo: Abstr
             select.append(node)
 
     bdd_with_root = get_bdd(sg, repo)
-    p = provide_p_direct_from_data(sg, data)
+    if data_src == "data":
+        p = provide_p_direct_from_data(sg, data)
+    else:
+        p = provide_p_unknown_data(sg)
     result = birnbaum_importance(sg, p, bdd_with_root=bdd_with_root, select=select)
 
     name = "birnbaum_importances_select_{}_{}".format(select_key, select_value)
 
     return {name: result["select"]}
 
-
-def get_birnbaum_structural_importances_select(sg: SystemGraph, selector, repo: AbstractRepository, data: Dict, prefs=None) -> Dict[str, float]:
-    prefs = apply_prefs(prefs)
-
-    select = []
-
-    for node, node_data in data["nodes"].items():
-        if "attributes" in node_data:
-            attributes = {a.key: a.value for a in node_data["attributes"]}
-            if selector.key in attributes and attributes[selector.key] == selector.value:
-                select.append(node)
-
-    bdd_with_root = get_bdd(sg, repo)
-    result = birnbaum_structural_importance(sg, bdd_with_root=bdd_with_root, select=select)
-
-    name = "birnbaum_importances_select_{}_{}".format(selector.key, selector.value)
-
-    return {name: result["select"]}
 
 
 def get_fractional_importance_traits(sg: SystemGraph, data: Dict, prefs=None) -> Dict[str, float]:

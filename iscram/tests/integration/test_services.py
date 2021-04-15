@@ -22,21 +22,21 @@ def test_get_birnbaum_importance(minimal: SystemGraph):
             "x3": {"risk": 0.5}
         }
     }
-    b_imps = services.get_birnbaum_importances(minimal, repo, data)
+    b_imps = services.get_birnbaum_importances(minimal, repo, data, data_src="data")
     assert len(b_imps) != 0
 
 
 def test_select_attribute_no_suppliers(minimal: SystemGraph):
     repo = FakeRepository()
     data = {"nodes": {}}
-    result = services.get_birnbaum_importances_select(minimal, {"domestic": False}, repo, data)
+    result = services.get_birnbaum_importances_select(minimal, repo, data, {"domestic": False}, "data")
     assert "birnbaum_importances_select_domestic_False" in result
 
 
 def test_select_attribute_suppliers(diamond_suppliers: SystemGraph):
     repo = FakeRepository()
     data = {"nodes": {}}
-    result = services.get_birnbaum_importances_select(diamond_suppliers, {"domestic": False}, repo, data)
+    result = services.get_birnbaum_importances_select(diamond_suppliers, repo, data, {"domestic": False}, "data")
     assert "birnbaum_importances_select_domestic_False" in result
     assert result["birnbaum_importances_select_domestic_False"] == 0
 
@@ -57,21 +57,21 @@ def test_service_birnbaum_structural_importance_with_no_scaling(full_example_sys
 
 def test_service_birnbaum_importance_with_scaling(full_example_system: SystemGraph, full_example_data_1: Dict):
     repo = FakeRepository()
-    b_imps = services.get_birnbaum_importances(full_example_system, repo, full_example_data_1, {"SCALE_METRICS": "PROPORTIONAL"})
+    b_imps = services.get_birnbaum_importances(full_example_system, repo, full_example_data_1, "data", {"SCALE_METRICS": "PROPORTIONAL"})
     assert len(b_imps) != 0
     assert approx(sum(b_imps.values()) == 1)
 
 
 def test_service_birnbaum_importance_with_no_scaling(full_example_system: SystemGraph, full_example_data_1: Dict):
     repo = FakeRepository()
-    b_imps = services.get_birnbaum_importances(full_example_system, repo, full_example_data_1, {"SCALE_METRICS": "NONE"})
+    b_imps = services.get_birnbaum_importances(full_example_system, repo, full_example_data_1, "data", {"SCALE_METRICS": "NONE"})
     assert len(b_imps) != 0
     assert approx(sum(b_imps.values()) < 1)
 
 
 def test_service_birnbaum_importance_default_scaling(full_example_system: SystemGraph, full_example_data_1: Dict):
     repo = FakeRepository()
-    b_imps = services.get_birnbaum_importances(full_example_system, repo, full_example_data_1)
+    b_imps = services.get_birnbaum_importances(full_example_system, repo, full_example_data_1, "data")
     assert len(b_imps) != 0
     assert approx(max(b_imps.values()) == 1)
     assert approx(min(b_imps.values()) == 0)

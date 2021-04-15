@@ -4,15 +4,18 @@ from iscram.domain.model import (
 
 
 def test_minimal(minimal: SystemGraph):
-    minimal.self_validate()
+    # makes sure validator has run
+    assert minimal is not None
 
 
 def test_diamond(diamond: SystemGraph):
-    diamond.self_validate()
+    # makes sure validator has run
+    assert diamond is not None
 
 
 def test_diamond_suppliers(diamond_suppliers: SystemGraph):
-    diamond_suppliers.self_validate()
+    # makes sure validator has run
+    assert diamond_suppliers is not None
 
 
 # Tests for System Graph Hashing
@@ -52,4 +55,4 @@ def test_load_from_dict():
         ]
     }
     sg = SystemGraph(**d)
-    sg.self_validate()
+    assert sg is not None
