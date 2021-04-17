@@ -64,7 +64,7 @@ def get_birnbaum_importances(sg: SystemGraph, repo: AbstractRepository, data: Di
     return apply_scaling(result, prefs["SCALE_METRICS"])
 
 
-def get_birnbaum_importances_select(sg: SystemGraph, repo: AbstractRepository, data: Dict, selector: Dict, data_src: str, prefs=None) -> Dict[str, float]:
+def get_birnbaum_importances_select(sg: SystemGraph, repo: AbstractRepository, data: Dict, selector: Dict, data_src: str, prefs=None) -> Dict[str, Dict[bool, float]]:
     prefs = apply_prefs(prefs)
 
     select_key = list(selector.keys())
@@ -89,14 +89,22 @@ def get_birnbaum_importances_select(sg: SystemGraph, repo: AbstractRepository, d
         p = provide_p_unknown_data(sg)
     result = birnbaum_importance(sg, p, bdd_with_root=bdd_with_root, select=select)
 
-    name = "birnbaum_importances_select_{}_{}".format(select_key, select_value)
-
-    return {name: result["select"]}
+    return {select_key: {select_value: result["select"]}}
 
 
+def get_attribute_sensitivity(sg: SystemGraph, repo: AbstractRepository, data: Dict, data_src: str, prefs: Dict=None) -> Dict[str, Dict[bool, float]]:
+    all_attrs = set()
+    for node, nodeData in data["nodes"].items():
+        if "attributes" in nodeData:
+            all_attrs.update(nodeData["attributes"])
+    results = {a: {} for a in all_attrs}
+    for attr in all_attrs:
+        for value in (True, False):
+            results[attr].update(get_birnbaum_importances_select(sg, repo, data, {attr: value}, data_src, prefs)[attr])
 
-def get_fractional_importance_traits(sg: SystemGraph, data: Dict, prefs=None) -> Dict[str, float]:
+    return results
+
+
+def get_fractional_importance_traits(sg: SystemGraph, data: Dict, prefs=None) -> Dict[str, Dict[bool, float]]:
     prefs = apply_prefs(prefs)
-    result = fractional_importance_of_attributes(sg, data)
-    result = {"{}_{}".format(key[0], key[1]) : value for key, value in result.items()}
-    return apply_scaling(result, prefs["SCALE_METRICS"])
+    return fractional_importance_of_attributes(sg, data)

@@ -30,15 +30,15 @@ def test_select_attribute_no_suppliers(minimal: SystemGraph):
     repo = FakeRepository()
     data = {"nodes": {}}
     result = services.get_birnbaum_importances_select(minimal, repo, data, {"domestic": False}, "data")
-    assert "birnbaum_importances_select_domestic_False" in result
+    assert "domestic" in result
 
 
 def test_select_attribute_suppliers(diamond_suppliers: SystemGraph):
     repo = FakeRepository()
     data = {"nodes": {}}
     result = services.get_birnbaum_importances_select(diamond_suppliers, repo, data, {"domestic": False}, "data")
-    assert "birnbaum_importances_select_domestic_False" in result
-    assert result["birnbaum_importances_select_domestic_False"] == 0
+    assert "domestic" in result
+    assert result["domestic"][False] == 0
 
 
 def test_service_birnbaum_structural_importance_with_scaling(full_example_system: SystemGraph):
@@ -78,9 +78,16 @@ def test_service_birnbaum_importance_default_scaling(full_example_system: System
 
 
 def test_service_fractional_importance_traits_with_scaling(full_example_system: SystemGraph, full_example_data_1: Dict):
-    f_imps = services.get_fractional_importance_traits(full_example_system, full_example_data_1, {"SCALE_METRICS": "PROPORTIONAL"})
+    f_imps = services.get_fractional_importance_traits(full_example_system, full_example_data_1)
     assert len(f_imps) != 0
-    assert approx(sum(f_imps.values()) == 1)
+    assert approx(sum([sum(f_imps[k].values()) for k in f_imps]) == 1)
+
+
+def test_service_get_attribute_sensitivity(full_example_system: SystemGraph, full_example_data_1: Dict):
+    repo = FakeRepository()
+
+    result = services.get_attribute_sensitivity(full_example_system, repo, full_example_data_1, "data")
+    assert result is not None
 
 
 def test_speed_importances_rand_tree_500():

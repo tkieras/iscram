@@ -86,17 +86,17 @@ async def node_importance_improvement_potential(data_source: str, rq: RequestBod
 
 
 @app.post("/id/{sg_id}/analyze/attribute/importance/sensitivity", response_model=AnalysisResponseBody)
-async def attribute_importance_sensitivity(data_source: str, rq: RequestBody = Body(...), attribute: Optional[str] = None, value: Optional[bool] = True):
+async def attribute_importance_sensitivity(data_source: str, rq: RequestBody = Body(...), attribute: Optional[str] = None, value: Optional[bool] = None):
     if attribute is not None:
         payload = services.get_birnbaum_importances_select(rq.system_graph, repo, rq.data, {attribute: value}, data_source)
         return dict(name="attribute_importance_sensitivity", payload=payload, data_source=data_source, attribute=attribute, value=value)
     else:
-        # service for all attributes at once
-        return {"name": "attribute_importance_sensitivity", "payload":{"message": "Not Implemented"}}
+        payload = services.get_attribute_sensitivity(rq.system_graph, repo, rq.data, data_source)
+        return dict(name="attribute_importance_sensitivity", payload=payload, data_source=data_source, attribute=attribute, value=value)
 
 
 @app.post("/id/{sg_id}/analyze/attribute/importance/fractional", response_model=AnalysisResponseBody)
-async def attribute_importance_fractional(rq: RequestBody = Body(...), attribute: Optional[str] = None, value: Optional[bool] = True):
+async def attribute_importance_fractional(rq: RequestBody = Body(...), attribute: Optional[str] = None, value: Optional[bool] = None):
     if attribute is not None:
         return {"name": "attribute_importance_fractional", "payload":{"message": "Not Implemented"}}
     else:

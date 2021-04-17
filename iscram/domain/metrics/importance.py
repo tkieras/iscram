@@ -40,7 +40,7 @@ def birnbaum_importance(sg: SystemGraph, p, bdd_with_root=None, select=None):
     return b_imps
 
 
-def fractional_importance_of_attributes(sg: SystemGraph, data, error_on_missing_data=False) -> Dict[str, float]:
+def fractional_importance_of_attributes(sg: SystemGraph, data, error_on_missing_data=False) -> Dict[str, Dict[bool, float]]:
     all_attributes = []
 
     try:
@@ -57,6 +57,8 @@ def fractional_importance_of_attributes(sg: SystemGraph, data, error_on_missing_
 
     counts = Counter(all_attributes)
     total = sum(counts.values())
-    f_imps = {(key, value): (counts[(key, value)] / total) for key, value in all_attributes}
+    f_imps = {attribute: {} for attribute, _ in counts.keys()}
+    for attribute, value in counts.keys():
+        f_imps[attribute][value] = counts[(attribute, value)] / total
 
     return f_imps

@@ -33,7 +33,7 @@ def test_select_birnbaum_importance_none(full_example_system: SystemGraph, full_
 def test_fractional_importance_traits(full_example_system: SystemGraph, full_example_data_1: Dict):
     f_imps = fractional_importance_of_attributes(full_example_system, full_example_data_1)
 
-    assert approx((5/28), f_imps[("domestic", False)])
-    assert approx((9/28), f_imps[("domestic", True)])
-    assert approx((7/28), f_imps[("certified", False)])
-    assert approx((7/28), f_imps[("certified", True)])
+    assert approx((5/28), f_imps["domestic"][False])
+    assert approx((9/28), f_imps["domestic"][True])
+    assert approx((7/28), f_imps["certified"][False])
+    assert approx((7/28), f_imps["certified"][True])
