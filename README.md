@@ -90,121 +90,134 @@ A sample input file can be found at the top level directory of this repository. 
 
 ## System Graph Data Structure
 
-The input for ISCRAM function is called a System Graph, which is a collection of nodes and edges representing the different features of the system being analyzed.
+API documentation can be found by visiting:
 
-Whether run as a CLI application or as a server, all ISCRAM functions require the input to be valid JSON containing a valid System Graph.
+- `localhost:8000/docs`
 
-### The Basic Structure of a System Graph
+The input for ISCRAM function is split into two data structures:
+	- a System Graph, which is a collection of nodes and edges representing the different features of the system being analyzed.
+	- an optional data object.
+
+Whether run as a CLI application or as a server, all ISCRAM functions require the input to be valid JSON containing a valid System Graph, optional data and optional preferences, as follows:
+``` 
+{
+	"system_graph": ...,
+	"data": ...,
+	"preferences": ...,
+}
+```
+
+This schema can be found in the documentation as 'RequestBody.'
+
+A full example can be found in `iscram/sample-file.json`.
+
+### System Graph
 
 A System Graph is structured as follows:
 
 ```
 {
-	"name": name,
-	"components": [],
-	"suppliers": [],
-	"security_dependencies": [],
-	"offerings": [],
-	"indicator": {
-		"logic_function" : logic_function_option,
-		"dependencies" : []
-	}
+	"nodes": {},
+	"edges": []
 }
 ```
 
-The above fields are all required.
+Both fields are required.
 
-The name may be any string.
+#### Node
 
-The logic_function_option must be either "and" or "or".
-
-The above will be accepted as valid but without producing any results since the graph is empty.
-
-#### Component
-
-Each item in the component list has the following data:
+The items in the node field are key, value pairs where the key is the name of the node, and the value is an object with the following properties.
 
 ```
 {
-	"identifier" : name,
-	"logic_function" : logic_function_option,
-	"risk" : risk,
-	"cost" : cost
+	"tags" : []
+	"logic" : {"node_type": "logic_type"},
 }
 ```
 
-The name may be any string that begins with an alphabetic character (i.e., a-z or A-Z).
+The key may be any string that begins with an alphabetic character (i.e., a-z or A-Z).
 
-The logic_function_option must be either "and" or "or".
+The tags list contains any number of relevant tags. For ISCRAM each node must be tagged as exactly one of the following node types:
+	
+	- component
+	- supplier
+	- indicator
 
-The risk must be a float between 0.0 and 1.0.
+One node must be tagged as indicator, and its name must be indicator as well.
 
-The cost may be any positive integer.
+The tags specify the type of node and its role in the system.
 
+The logic field contains key, value pairs where the key is a node type (one of the above required tags), and the value is one of:
+	
+	- and
+	- or
 
-#### Supplier
-
-Each supplier has the following data.
-
+As an example, the following object defines a component node where logical or defines its dependence on other components.
 ```
 {
-	"identifier": name,
-	"trust": trust,
-	"traits": []
+	"tags": ["component"],
+	"logic": {"component": "or"}
 }
 ```
+Each component node must have a component logic function provided explicitly. Supplier nodes may omit this, and use "and" by default for other suppliers.
 
-The name may be any string that begins with an alphabetic character (i.e., a-z or A-Z).
+#### Edge
 
-The trust must be a float between 0.0 and 1.0.
-
-Each item in the traits list must have the following data:
-
-```
-{ 
-	key: name, 
-	value: trait_value
-}
-```
-
-The key may be any string. The trait_value must be either true or false.
-
-#### Security Dependencies
-
-Edges in the graph are involved in two places in the System Graph:
-
-- security_dependencies
-- indicator.dependencies
-
-Each item in both lists must have the following data:
-
+Each object in the edge list should have the following form:
 ```
 {
-	"risk_src_id": src_name,
-	"risk_dst_id": dst_name
+	"src": nodeId,
+	"dst": nodeId
+	"tags: []
 }
 ```
 
-The src_name and dst_name must be equal to the identifier values of components or suppliers that exist in the system. 
+The src and dst fields must match keys in the node object.
+The tags field is optional, but if it is present and if the tag "potential" is included, then the edge is treated as irrelevant for the purpose of risk analysis.
 
+### Data
 
-#### Offerings
+Data is provided in the form of a second object with the following basic structure, similar to a system graph:
 
-Each item in the offering list must have the following data:
-
-```
+``` 
 {
-	"supplier_id": supplier_name,
-	"component_id": component_name,
-	"risk": risk,
-	"cost": cost
+	"nodes": {},
+	"edges": [],
 }
 ```
 
-The supplier name must match a supplier's identifier; likewise for the component name.
+The nodes object contains key, value pairs where the key must match an existing node in the system graph, and the value contains a data object:
 
-The risk must be a float between 0.0 and 1.0.
+The fields in the data object are flexible but should include risk.
+``` 
+{
+	"risk": 0 <= float <= 1,
+	"attributes": {}
+}
+```
 
-The cost may be any positive integer.
+An additional field in the data object may be "attributes", which contains key, value pairs as follows.
+``` 
+{
+	attribute_name: attribute_value
+}
+```
 
-Offerings are used only for optimization related functions and have no effect on risk analysis unless they are first converted to security dependencies as an explicit step in an optimization process.
+The attribute name may be any string, and the attribute_value should be true or false (boolean).
+
+Edge data may be provided as well, where each item in the edge data list has the following form:
+
+``` 
+{
+	"src": nodeId,
+	"dst": dstId,
+	"risk": 0 <= float <= 1,
+	"cost": 0 <= integer
+}
+```
+
+Edge data is used only for optimization/recommendation services, and plays no role in risk analysis.
+
+Further details can be found by viewing the OpenAPI documentation at:
+
+- `localhost:8000/docs`
