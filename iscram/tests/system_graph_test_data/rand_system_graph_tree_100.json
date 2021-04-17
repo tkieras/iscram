@@ -1,0 +1,1202 @@
+{
+    "nodes": {
+        "indicator": {
+            "tags": [
+                "indicator"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x9": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x86": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "and"
+            }
+        },
+        "x93": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x30": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x72": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x48": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x94": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x54": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "and"
+            }
+        },
+        "x81": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x74": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "and"
+            }
+        },
+        "x31": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x96": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "and"
+            }
+        },
+        "x51": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x40": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x57": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x92": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x7": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x50": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x38": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x69": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x53": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x87": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x19": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x76": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x12": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x13": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x2": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "and"
+            }
+        },
+        "x4": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "and"
+            }
+        },
+        "x58": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "and"
+            }
+        },
+        "x16": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "and"
+            }
+        },
+        "x60": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "and"
+            }
+        },
+        "x43": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x56": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "and"
+            }
+        },
+        "x97": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "and"
+            }
+        },
+        "x65": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x24": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x55": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x3": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x23": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x83": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x95": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x61": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "and"
+            }
+        },
+        "x78": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x26": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "and"
+            }
+        },
+        "x66": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "and"
+            }
+        },
+        "x42": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "and"
+            }
+        },
+        "x41": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "and"
+            }
+        },
+        "x59": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x77": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "and"
+            }
+        },
+        "x49": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x62": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "and"
+            }
+        },
+        "x91": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x68": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "and"
+            }
+        },
+        "x64": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "and"
+            }
+        },
+        "x28": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "and"
+            }
+        },
+        "x10": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "and"
+            }
+        },
+        "x47": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "and"
+            }
+        },
+        "x21": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x8": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "and"
+            }
+        },
+        "x25": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x32": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x14": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "and"
+            }
+        },
+        "x73": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x35": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "and"
+            }
+        },
+        "x29": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "and"
+            }
+        },
+        "x82": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "and"
+            }
+        },
+        "x44": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "and"
+            }
+        },
+        "x79": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "and"
+            }
+        },
+        "x5": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x15": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "and"
+            }
+        },
+        "x75": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "and"
+            }
+        },
+        "x39": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x18": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "and"
+            }
+        },
+        "x88": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "and"
+            }
+        },
+        "x67": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "and"
+            }
+        },
+        "x98": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "and"
+            }
+        },
+        "x45": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "and"
+            }
+        },
+        "x89": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x33": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x63": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x80": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x85": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x20": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x90": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x34": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x22": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x6": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "and"
+            }
+        },
+        "x99": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "and"
+            }
+        },
+        "x84": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x52": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x46": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "and"
+            }
+        },
+        "x1": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "and"
+            }
+        },
+        "x71": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x17": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "and"
+            }
+        },
+        "x27": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x36": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "and"
+            }
+        },
+        "x37": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        },
+        "x70": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "and"
+            }
+        },
+        "x11": {
+            "tags": [
+                "component"
+            ],
+            "logic": {
+                "component": "or"
+            }
+        }
+    },
+    "edges": [
+        {
+            "src": "x9",
+            "dst": "indicator"
+        },
+        {
+            "src": "x86",
+            "dst": "indicator"
+        },
+        {
+            "src": "x93",
+            "dst": "x86"
+        },
+        {
+            "src": "x30",
+            "dst": "x9"
+        },
+        {
+            "src": "x72",
+            "dst": "x93"
+        },
+        {
+            "src": "x48",
+            "dst": "x9"
+        },
+        {
+            "src": "x94",
+            "dst": "x30"
+        },
+        {
+            "src": "x54",
+            "dst": "x48"
+        },
+        {
+            "src": "x81",
+            "dst": "x94"
+        },
+        {
+            "src": "x74",
+            "dst": "x9"
+        },
+        {
+            "src": "x31",
+            "dst": "x54"
+        },
+        {
+            "src": "x96",
+            "dst": "x48"
+        },
+        {
+            "src": "x51",
+            "dst": "x74"
+        },
+        {
+            "src": "x40",
+            "dst": "x74"
+        },
+        {
+            "src": "x57",
+            "dst": "x30"
+        },
+        {
+            "src": "x92",
+            "dst": "x9"
+        },
+        {
+            "src": "x7",
+            "dst": "x94"
+        },
+        {
+            "src": "x50",
+            "dst": "x54"
+        },
+        {
+            "src": "x38",
+            "dst": "x92"
+        },
+        {
+            "src": "x69",
+            "dst": "x30"
+        },
+        {
+            "src": "x53",
+            "dst": "x57"
+        },
+        {
+            "src": "x87",
+            "dst": "x7"
+        },
+        {
+            "src": "x19",
+            "dst": "x94"
+        },
+        {
+            "src": "x76",
+            "dst": "x72"
+        },
+        {
+            "src": "x12",
+            "dst": "x38"
+        },
+        {
+            "src": "x13",
+            "dst": "x69"
+        },
+        {
+            "src": "x2",
+            "dst": "x13"
+        },
+        {
+            "src": "x4",
+            "dst": "x19"
+        },
+        {
+            "src": "x58",
+            "dst": "x93"
+        },
+        {
+            "src": "x16",
+            "dst": "x12"
+        },
+        {
+            "src": "x60",
+            "dst": "x19"
+        },
+        {
+            "src": "x43",
+            "dst": "x13"
+        },
+        {
+            "src": "x56",
+            "dst": "x58"
+        },
+        {
+            "src": "x97",
+            "dst": "x56"
+        },
+        {
+            "src": "x65",
+            "dst": "x86"
+        },
+        {
+            "src": "x24",
+            "dst": "x60"
+        },
+        {
+            "src": "x55",
+            "dst": "x54"
+        },
+        {
+            "src": "x3",
+            "dst": "x4"
+        },
+        {
+            "src": "x23",
+            "dst": "x9"
+        },
+        {
+            "src": "x83",
+            "dst": "x58"
+        },
+        {
+            "src": "x95",
+            "dst": "x43"
+        },
+        {
+            "src": "x61",
+            "dst": "x65"
+        },
+        {
+            "src": "x78",
+            "dst": "x13"
+        },
+        {
+            "src": "x26",
+            "dst": "x95"
+        },
+        {
+            "src": "x66",
+            "dst": "x30"
+        },
+        {
+            "src": "x42",
+            "dst": "x93"
+        },
+        {
+            "src": "x41",
+            "dst": "x7"
+        },
+        {
+            "src": "x59",
+            "dst": "x72"
+        },
+        {
+            "src": "x77",
+            "dst": "x69"
+        },
+        {
+            "src": "x49",
+            "dst": "x58"
+        },
+        {
+            "src": "x62",
+            "dst": "x13"
+        },
+        {
+            "src": "x91",
+            "dst": "x66"
+        },
+        {
+            "src": "x68",
+            "dst": "x76"
+        },
+        {
+            "src": "x64",
+            "dst": "x19"
+        },
+        {
+            "src": "x28",
+            "dst": "x3"
+        },
+        {
+            "src": "x10",
+            "dst": "x68"
+        },
+        {
+            "src": "x47",
+            "dst": "x24"
+        },
+        {
+            "src": "x21",
+            "dst": "x61"
+        },
+        {
+            "src": "x8",
+            "dst": "x65"
+        },
+        {
+            "src": "x25",
+            "dst": "x40"
+        },
+        {
+            "src": "x32",
+            "dst": "x21"
+        },
+        {
+            "src": "x14",
+            "dst": "x92"
+        },
+        {
+            "src": "x73",
+            "dst": "x43"
+        },
+        {
+            "src": "x35",
+            "dst": "x58"
+        },
+        {
+            "src": "x29",
+            "dst": "x77"
+        },
+        {
+            "src": "x82",
+            "dst": "x95"
+        },
+        {
+            "src": "x44",
+            "dst": "x10"
+        },
+        {
+            "src": "x79",
+            "dst": "x82"
+        },
+        {
+            "src": "x5",
+            "dst": "x48"
+        },
+        {
+            "src": "x15",
+            "dst": "x64"
+        },
+        {
+            "src": "x75",
+            "dst": "x86"
+        },
+        {
+            "src": "x39",
+            "dst": "x76"
+        },
+        {
+            "src": "x18",
+            "dst": "x81"
+        },
+        {
+            "src": "x88",
+            "dst": "x5"
+        },
+        {
+            "src": "x67",
+            "dst": "x26"
+        },
+        {
+            "src": "x98",
+            "dst": "x13"
+        },
+        {
+            "src": "x45",
+            "dst": "x73"
+        },
+        {
+            "src": "x89",
+            "dst": "x97"
+        },
+        {
+            "src": "x33",
+            "dst": "indicator"
+        },
+        {
+            "src": "x63",
+            "dst": "x89"
+        },
+        {
+            "src": "x80",
+            "dst": "x86"
+        },
+        {
+            "src": "x85",
+            "dst": "x69"
+        },
+        {
+            "src": "x20",
+            "dst": "x25"
+        },
+        {
+            "src": "x90",
+            "dst": "x72"
+        },
+        {
+            "src": "x34",
+            "dst": "x54"
+        },
+        {
+            "src": "x22",
+            "dst": "x16"
+        },
+        {
+            "src": "x6",
+            "dst": "x74"
+        },
+        {
+            "src": "x99",
+            "dst": "x95"
+        },
+        {
+            "src": "x84",
+            "dst": "x64"
+        },
+        {
+            "src": "x52",
+            "dst": "x73"
+        },
+        {
+            "src": "x46",
+            "dst": "x44"
+        },
+        {
+            "src": "x1",
+            "dst": "x15"
+        },
+        {
+            "src": "x71",
+            "dst": "x22"
+        },
+        {
+            "src": "x17",
+            "dst": "x85"
+        },
+        {
+            "src": "x27",
+            "dst": "x59"
+        },
+        {
+            "src": "x36",
+            "dst": "x30"
+        },
+        {
+            "src": "x37",
+            "dst": "x4"
+        },
+        {
+            "src": "x70",
+            "dst": "x94"
+        },
+        {
+            "src": "x11",
+            "dst": "x76"
+        }
+    ]
+}

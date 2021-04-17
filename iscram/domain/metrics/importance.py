@@ -1,67 +1,64 @@
 from collections import Counter
+from typing import Dict
 
-from iscram.domain.model import SystemGraph
-
-from iscram.domain.metrics.risk import (
-    collect_x, risk_by_bdd
+from iscram.domain.model import (
+    SystemGraph, DataValidationError
 )
+from iscram.domain.metrics.risk import risk_by_bdd
+from iscram.domain.metrics.probability_providers import provide_p_unknown_data
 
 
 def birnbaum_structural_importance(sg: SystemGraph, bdd_with_root=None, select=None):
-    all_ids = {c.identifier for c in sg.components}
-    all_ids.update({s.identifier for s in sg.suppliers})
-
-    x = {i: 0.5 for i in all_ids}
-    x["indicator"] = 0  # indicator, manual, should always be zero
-
-    return birnbaum_importance(sg, x, bdd_with_root, select)
+    return birnbaum_importance(sg, provide_p_unknown_data(sg), bdd_with_root, select)
 
 
-def birnbaum_importance(sg: SystemGraph, x=None, bdd_with_root=None, select=None):
+def birnbaum_importance(sg: SystemGraph, p, bdd_with_root=None, select=None):
     b_imps = {}
-
-    all_ids = {c.identifier for c in sg.components}
-    all_ids.update({s.identifier for s in sg.suppliers})
-
-    if x is None:
-        x = collect_x(sg)
 
     if select is not None:
         for i in select:
-            x[i] = 1.0
-        risk_top = risk_by_bdd(sg, x, bdd_with_root)
+            p[i] = 1.0
+        risk_top = risk_by_bdd(sg, p, bdd_with_root)
 
         for i in select:
-            x[i] = 0.0
-        risk_bottom = risk_by_bdd(sg, x, bdd_with_root)
+            p[i] = 0.0
+        risk_bottom = risk_by_bdd(sg, p, bdd_with_root)
 
         b_imps["select"] = risk_top-risk_bottom
         return b_imps
 
-    for i in all_ids:
-        saved = x[i]
-        x[i] = 1.0
-        risk_top = risk_by_bdd(sg, x, bdd_with_root)
-        x[i] = 0.0
-        risk_bottom = risk_by_bdd(sg, x, bdd_with_root)
+    for i in sg.nodes:
+        saved = p[i]
+        p[i] = 1.0
+        risk_top = risk_by_bdd(sg, p, bdd_with_root)
+        p[i] = 0.0
+        risk_bottom = risk_by_bdd(sg, p, bdd_with_root)
         b_imps[i] = risk_top - risk_bottom
-        x[i] = saved  # restore to initial state
+        p[i] = saved  # restore to initial state
 
+    del b_imps["indicator"]
     return b_imps
 
 
-def fractional_importance_traits(sg: SystemGraph, select=()):
-    traits = []
+def fractional_importance_of_attributes(sg: SystemGraph, data, error_on_missing_data=False) -> Dict[str, Dict[bool, float]]:
+    all_attributes = []
 
-    for node in sg.suppliers:
-        try:
-            for t in node.traits:
-                traits.append((t.key, t.value))
-        except AttributeError:
-            pass
+    try:
+        for node in sg.nodes:
+            if node in data["nodes"]:
+                if "attributes" in data["nodes"][node]:
+                    for key, value in data["nodes"][node]["attributes"].items():
+                        all_attributes.append((key, value))
+            elif error_on_missing_data:
+                raise DataValidationError("Missing attribute data for node: {}".format(node))
+    except KeyError:
+        if error_on_missing_data:
+            raise DataValidationError("Invalid data for attribute importance calculation.")
 
-    counts = Counter(traits)
+    counts = Counter(all_attributes)
     total = sum(counts.values())
-    f_imps = {t: (counts[t] / total) for t in traits}
+    f_imps = {attribute: {} for attribute, _ in counts.keys()}
+    for attribute, value in counts.keys():
+        f_imps[attribute][value] = counts[(attribute, value)] / total
 
     return f_imps

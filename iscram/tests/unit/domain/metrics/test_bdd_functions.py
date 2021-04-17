@@ -4,13 +4,48 @@ import pytest
 
 from iscram.domain.model import SystemGraph
 from iscram.domain.metrics.bdd_functions import (
-    build_bdd, bdd_prob
+    build_bdd, bdd_prob, build_sg_graph_dict, recursive_build_expr
 )
 
 
-def test_smoke_build_bdd(simple_or: SystemGraph):
-    bdd, root = build_bdd(simple_or)
+def test_smoke_build_bdd(minimal: SystemGraph):
+    bdd, root = build_bdd(minimal)
     assert bdd is not None
+
+
+def test_build_sg_graph_dict_1(diamond: SystemGraph):
+    expected = {
+        "indicator": {"component": ["x3", "x2"]},
+        "x3": {"component": ["x1"]},
+        "x2": {"component": ["x1"]},
+        "x1": {}
+    }
+    assert build_sg_graph_dict(diamond) == expected
+
+
+def test_build_sg_graph_dict_2(diamond_suppliers: SystemGraph):
+    expected = {
+        "indicator": {"component": ["x3", "x2"]},
+        "x3": {"component": ["x1"], "supplier": ["s3"]},
+        "x2": {"component": ["x1"], "supplier": ["s2"]},
+        "x1": {"supplier": ["s1"]},
+        "s1": {},
+        "s2": {},
+        "s3": {}
+    }
+    assert build_sg_graph_dict(diamond_suppliers) == expected
+
+
+def test_recursive_build_expr_1(diamond: SystemGraph):
+    g = build_sg_graph_dict(diamond)
+    expected = "( indicator | ( ( x3 | x1 ) | ( x2 | x1 ) ) )"
+    assert recursive_build_expr(diamond, g, "indicator", []) == expected
+
+
+def test_recursive_build_expr_2(diamond_suppliers: SystemGraph):
+    g = build_sg_graph_dict(diamond_suppliers)
+    expected = "( indicator | ( ( x3 | ( x1 | s1 ) | s3 ) | ( x2 | ( x1 | s1 ) | s2 ) ) )"
+    assert recursive_build_expr(diamond_suppliers, g, "indicator", []) == expected
 
 
 def test_prob_ex_rauzy_1():

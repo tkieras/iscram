@@ -5,88 +5,68 @@ from iscram.domain.model import SystemGraph
 fmt_bdd = {"or": " | ", "and": " & "}
 
 
-def node_expr(n, logic, c_deps, s_deps):
-    expr = n
+def build_sg_graph_dict(sg: SystemGraph):
+    """ Builds a dictionary of dependencies for each node, where each node can have either component
+    or supplier dependents or both. If a node has no dependents of a certain type, the key is missing.
+    A node with no dependents has an empty dictionary."""
+    def type_tag(node):
+        return list(filter(lambda t: t in ("component", "supplier"), sg.nodes[node].tags))[0]
 
-    if len(c_deps) > 0:
-        expr += fmt_bdd["or"]
-        c_deps_fmt = fmt_bdd[logic]
-        c_deps_expr = c_deps_fmt.join(c_deps)
-        expr += "( " + c_deps_expr + " )"
+    g = {n: {} for n in sg.nodes.keys()}
+    for e in sg.edges:
+        if "potential" not in e.tags:
+            g[e.dst][type_tag(e.src)] = g[e.dst].get(type_tag(e.src), []) + [e.src]
 
-    if len(s_deps) > 0:
-        expr += fmt_bdd["or"]
-        s_deps_expr = fmt_bdd["and"].join(s_deps)
-        expr += "( " + s_deps_expr + " )"
+    return g
 
-    return expr
+
+def recursive_build_expr(sg, g, u, discovered):
+    """ DFS to build the logical expression encoding system graph structure. """
+    # The discovered list is useful for BDD variable ordering heuristic
+    discovered.append(u)
+
+    # Get expressions (if any) for component and supplier dependencies. Lists should be empty if not any relevant deps.
+    comp_exprs = [recursive_build_expr(sg, g, c, discovered) for c in g[u].get("component", [])]
+    sup_exprs = [recursive_build_expr(sg, g, s, discovered) for s in g[u].get("supplier", [])]
+
+    # Combine current node with the non-empty dependency lists
+    # The basic expression format is ( this_node | ( component_deps ) | ( supplier_deps ) )
+    # component_deps should be joined by the component logic function specified in the sg
+    # supplier_deps are joined by default by "and"
+    # Some of the logic below is added only to produce cleaner formatting/parentheses.
+    expr = u
+    if len(comp_exprs) > 0:
+        comp_expr = fmt_bdd[sg.nodes[u].logic["component"]].join(comp_exprs)
+        if len(comp_exprs) > 1:
+            comp_expr = "( {} )".format(comp_expr)
+        expr = "{} | {}".format(expr, comp_expr)
+    if len(sup_exprs) > 0:
+        sup_expr = fmt_bdd[sg.nodes[u].logic.get("supplier", "and")].join(sup_exprs)
+        if len(sup_exprs) > 1:
+            sup_expr = "( {} )".format(sup_expr)
+        expr = "{} | {}".format(expr, sup_expr)
+
+    if expr == u:
+        return expr
+    else:
+        return "( {} )".format(expr)
 
 
 def prep_for_bdd(sg: SystemGraph):
-
-    ind_deps = [d.risk_src_id for d in sg.indicator.dependencies]
-    exprs = [
-        {"indicator": (fmt_bdd[sg.indicator.logic_function]).join(ind_deps) }
-    ]
-
-    components = set([c.identifier for c in sg.components])
-
-    l = {}
-    for c in sg.components:
-        l[c.identifier] = c.logic_function
-
-    for s in sg.suppliers:
-        l[s.identifier] = "and"
-
-    g = {}
-    supplier_deps = {}
-
-    for d in sg.security_dependencies:
-        if d.risk_dst_id in components and not d.risk_src_id in components:
-            adj = supplier_deps.get(d.risk_dst_id, [])
-            adj.append(d.risk_src_id)
-            supplier_deps[d.risk_dst_id] = adj
-        else:
-            adj = g.get(d.risk_dst_id, [])
-            adj.append(d.risk_src_id)
-            g[d.risk_dst_id] = adj
-
-    queue = list(ind_deps)
-    visited = set()
-
-    while(queue):
-        u = queue.pop(0)
-        if u in visited: continue
-        visited.add(u)
-        deps = g.get(u, [])
-        s_deps = supplier_deps.get(u, [])
-        logic = l[u]
-        exprs.append({
-            u: node_expr(u, logic, deps, s_deps)
-        })
-        queue.extend(deps)
-        queue.extend(s_deps)
-
-    order = list([list(e.keys())[0] for e in exprs])
-    order = {u: idx for idx, u in enumerate(order)}
-
-    return exprs, order
+    g = build_sg_graph_dict(sg)
+    discovered = []
+    r_expr = recursive_build_expr(sg, g, "indicator", discovered)
+    return r_expr, discovered
 
 
 def build_bdd(sg):
-    exprs, order = prep_for_bdd(sg)
+    """ Main function to produce a BDD from a system graph. Returns the BDD and root node as a tuple."""
+    r_expr, nodes_as_discovered = prep_for_bdd(sg)
 
     bdd = _bdd.BDD(memory_estimate=(int(2**30 * 0.3)))
     bdd.configure(reordering=True)
-
-    bdd.declare(*(["indicator"] + [c.identifier for c in sg.components] + [s.identifier for s in sg.suppliers]))
-
-    r = bdd.add_expr(exprs[0]["indicator"])
-
-    for d_raw in exprs[1:]:
-        d = {key: bdd.add_expr(val) for key, val in d_raw.items()}
-        r = bdd.let(d, r)
-
+    bdd.declare(*nodes_as_discovered)
+    r = bdd.add_expr(r_expr)
     bdd.reorder()
 
     return bdd, r

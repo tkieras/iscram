@@ -8,33 +8,44 @@ from iscram.domain.metrics.bdd_functions import build_bdd
 
 
 def prep_for_mocus(sg: SystemGraph, ignore_suppliers):
-    """ Combines parts of a SystemGraph into a unified graph with added gate nodes needed for the MOCUS algorithm."""
-    logic = {"indicator": sg.indicator.logic_function}
+    """ Combines parts of a SystemGraph into a unified graph with added gate nodes needed for the MOCUS algorithm.
+    The added gate nodes are marked with @deps. Each node becomes an or gate with an added gate as a child. The
+    resulting graph must have component children pointing to @deps, and each node's supplier pointing to itself. """
 
-    sg_suppliers = set([s.identifier for s in sg.suppliers])
+    logic = {"indicator": sg.nodes["indicator"].logic["component"]}
 
-    for c in sg.components:
-        logic["@deps_" + c.identifier] = c.logic_function
-        logic[c.identifier] = "or"
+    sg_suppliers = set()
+    sg_components = set()
+    for node, data in sg.nodes.items():
+        if "supplier" in data.tags:
+            sg_suppliers.add(node)
+        elif "component" in data.tags:
+            sg_components.add(node)
 
-    graph = {"indicator": set([d.risk_src_id for d in sg.indicator.dependencies])}
+    for c in sg_components:
+        logic["@deps_" + c] = sg.nodes[c].logic["component"]
+        logic[c] = "or"
 
-    for d in sg.security_dependencies:
-        src_is_supplier = d.risk_src_id in sg_suppliers
-        dst_is_supplier = d.risk_dst_id in sg_suppliers
+    graph = {"indicator": set(map(lambda edge: edge.src, filter(lambda edge: edge.dst == "indicator", sg.edges)))}
+
+    for e in sg.edges:
+        if "potential" in e.tags:
+            continue
+        src_is_supplier = e.src in sg_suppliers
+        dst_is_supplier = e.dst in sg_suppliers
 
         if dst_is_supplier:
-            dst_name = d.risk_dst_id
+            dst_name = e.dst
         else:
-            dst_name = "@deps_" + d.risk_dst_id
+            dst_name = "@deps_" + e.dst
 
         if src_is_supplier:
-            src_name = d.risk_src_id
+            src_name = e.src
         else:
-            src_name = d.risk_src_id
+            src_name = e.src
 
         if src_is_supplier and not dst_is_supplier:
-            dst_name = d.risk_dst_id
+            dst_name = e.dst
 
         if ignore_suppliers and (src_is_supplier or dst_is_supplier):
             pass
@@ -43,14 +54,14 @@ def prep_for_mocus(sg: SystemGraph, ignore_suppliers):
             adj.add(src_name)
             graph[dst_name] = adj
 
-    for c in sg.components:
-        adj = graph.get(c.identifier, set())
-        adj.add("@deps_" + c.identifier)
-        graph[c.identifier] = adj
+    for c in sg_components:
+        adj = graph.get(c, set())
+        adj.add("@deps_" + c)
+        graph[c] = adj
 
     if not ignore_suppliers:
-        for s in sg.suppliers:
-            logic[s.identifier] = "and"
+        for s in sg_suppliers:
+            logic[s] = "and"
 
     return graph, logic
 
@@ -63,6 +74,7 @@ def mocus(sg: SystemGraph, ignore_suppliers=False) -> FrozenSet[FrozenSet[str]]:
     """ Inefficient implementation of MOCUS.
     Gates are added to connect suppliers and components and their dependencies.
     Minimal cutsets including these gates can safely be deleted since the probability of gate failure is zero.
+    This function and the use of cutsets in general is deprecated in favor of BDD based functions.
     """
 
     graph, logic = prep_for_mocus(sg, ignore_suppliers)
@@ -73,7 +85,7 @@ def mocus(sg: SystemGraph, ignore_suppliers=False) -> FrozenSet[FrozenSet[str]]:
 
     working_result = remove_fictive_gate_cutsets(working_result)
 
-    return working_result
+    return frozenset(working_result)
 
 
 def iterative_mocus(n: str, graph: Dict, logic: Dict) -> List[Set]:
@@ -119,11 +131,11 @@ def is_fictive(node):
     return node[0] == "@"
 
 
-def remove_fictive_gate_cutsets(cutsets: FrozenSet[FrozenSet]) -> FrozenSet[FrozenSet]:
+def remove_fictive_gate_cutsets(cutsets: Set[FrozenSet]) -> Set[FrozenSet]:
     def no_fictive(cutset):
         return not any([is_fictive(node) for node in cutset])
 
-    return frozenset(filter(no_fictive, cutsets))
+    return set(filter(no_fictive, cutsets))
 
 
 def probability_union(x):
@@ -150,7 +162,7 @@ def minimize_cutsets(cutsets: List[FrozenSet]):
         if minimal:
             results.add(c)
 
-    return frozenset(results)
+    return results
 
 
 def brute_force_bdd_cutsets(sg: SystemGraph):
@@ -164,5 +176,6 @@ def brute_force_bdd_cutsets(sg: SystemGraph):
         cutsets.append(frozenset(filter(lambda u: s[u] is True, s.keys())))
 
     min_cutsets = minimize_cutsets(cutsets)
-    return min_cutsets
+    min_cutsets.remove(frozenset(["indicator"]))
+    return frozenset(min_cutsets)
 

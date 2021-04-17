@@ -1,0 +1,35 @@
+{
+    "nodes": {
+            "x1": {"risk": 0.1},
+			"x2": {"risk": 0.01},
+			"x3": {"risk": 0.15},
+			"x4": {"risk": 0.05},
+			"x5": {"risk": 0.1},
+			"x6": {"risk": 0.09},
+			"x7": {"risk": 0.1},
+			"x8": {"risk": 0.03},
+			"x9": {"risk": 0.1},
+			"x10": {"risk": 0.12},
+			"x11": {"risk": 0.09},
+			"x12": {"risk": 0.11},
+			"x13": {"risk": 0.13},
+			"x14": {"risk": 0.2},
+			"x15": {"risk": 0.1},
+
+			"x16": {"risk": 0.02, "attributes": {"domestic": false, "certified": true}},
+			"x17": {"risk": 0.01, "attributes": {"domestic": false, "certified": false}},
+			"x18": {"risk": 0.02, "attributes": {"domestic": false, "certified": false}},
+			"x19": {"risk": 0.07, "attributes": {"domestic": false, "certified": true}},
+			"x20": {"risk": 0.05, "attributes": {"domestic": false, "certified": true}},
+			"x21": {"risk": 0.04, "attributes": {"domestic": true, "certified": false}},
+			"x22": {"risk": 0.08, "attributes": {"domestic": true, "certified": false}},
+			"x23": {"risk": 0.08, "attributes": {"domestic": false, "certified": true}},
+			"x24": {"risk": 0.01, "attributes": {"domestic": true, "certified": false}},
+			"x25": {"risk": 0.07, "attributes": {"domestic": true, "certified": false}},
+			"x26": {"risk": 0.02, "attributes": {"domestic": true, "certified": true}},
+			"x27": {"risk": 0.05, "attributes": {"domestic": true, "certified": true}},
+			"x28": {"risk": 0.03, "attributes": {"domestic": true, "certified": true}},
+			"x29": {"risk": 0.04, "attributes": {"domestic": false, "certified": true}},
+			"x30": {"risk": 0.02, "attributes": {"domestic": true, "certified": true}}
+		}
+}

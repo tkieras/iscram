@@ -1,14 +1,13 @@
+from typing import FrozenSet, Dict, List
+from hashlib import md5
 from dataclasses import field
-from typing import FrozenSet
-from collections import defaultdict
 
+from pydantic import validator, root_validator
 from pydantic.dataclasses import dataclass
 
 
 def validate_identifier(identifier: str) -> bool:
     if len(identifier) == 0:
-        return False
-    if identifier == "indicator":
         return False
     return identifier[0].isalpha()
 
@@ -25,155 +24,151 @@ def validate_cost(cost: int) -> bool:
     return cost >= 0
 
 
-@dataclass(frozen=True)
-class Component:
-    identifier: str
-    logic_function: str = "and"
-    risk: float = 0.0
-    cost: int = 0
+class ModelValidationError(Exception):
+    def __init__(self, message):
+        self.message = message
 
-    def valid_values(self):
-        return all([validate_identifier(self.identifier),
-                    validate_logic_function(self.logic_function),
-                    validate_risk(self.risk),
-                    validate_cost(self.cost)])
+
+class DataValidationError(Exception):
+    def __init__(self, message):
+        self.message = message
 
 
 @dataclass(frozen=True)
-class Trait:
-    key: str
-    value: bool
+class Node:
+    logic: Dict = field(default_factory=dict)
+    tags: FrozenSet[str] = field(default_factory=frozenset)
+
+    @validator('logic', each_item=True)
+    def logic_valid_functions(cls, v):
+        if not validate_logic_function(v):
+            raise ValueError("Invalid logic function: {}".format(v))
+        return v
+
+    @root_validator()
+    def logic_tag_match(cls, values):
+        if "tags" not in values or "logic" not in values:
+            return values
+
+        if "component" in values["tags"] and "component" not in values["logic"]:
+            raise ValueError("Tag 'component' found in tags but not in logic.")
+        return values
+
+    def __hash__(self):
+        return hash(self.get_id())
+
+    def get_id(self):
+        message = ""
+        for key in sorted(self.logic.keys()):
+            message += (key + self.logic[key])
+        for t in sorted(self.tags):
+            message += t
+        message_hash = md5(message.encode('utf-8'))
+        return message_hash.hexdigest()
 
 
 @dataclass(frozen=True)
-class Supplier:
-    identifier: str
-    trust: float = 1.0
-    traits: FrozenSet[Trait] = field(default_factory=set)
+class Edge:
+    src: str
+    dst: str
+    tags: FrozenSet[str] = field(default_factory=frozenset)
 
-    def valid_values(self):
-        return all([validate_identifier(self.identifier),
-                    validate_risk(self.trust)])
+    @validator('src')
+    def src_must_be_valid_name(cls, v):
+        if not validate_identifier(v):
+            raise ValueError(f"{v} not a valid name.")
+        return v
 
+    @validator('dst')
+    def dst_must_be_valid_name(cls, v):
+        if not validate_identifier(v):
+            raise ValueError(f"{v} not a valid name.")
+        return v
 
-@dataclass(frozen=True)
-class Offering:
-    supplier_id: str
-    component_id: str
-    risk: float
-    cost: int
+    def get_id(self) -> str:
+        message = self.src + self.dst
+        for t in sorted(self.tags):
+            message += t
+        message_hash = md5(message.encode('utf-8'))
+        return message_hash.hexdigest()
 
-    def valid_values(self):
-        return all([self.supplier_id != self.component_id,
-                    validate_risk(self.risk),
-                    validate_cost(self.cost)])
-
-
-@dataclass(frozen=True)
-class RiskRelation:
-    risk_src_id: str
-    risk_dst_id: str
-
-
-@dataclass(frozen=True)
-class Indicator:
-    logic_function: str
-    dependencies: FrozenSet[RiskRelation] = field(default_factory=set)
-
-    def valid_values(self):
-        return all([all([d.risk_dst_id == "indicator" for d in self.dependencies]),
-                    validate_logic_function(self.logic_function)])
+    def __hash__(self):
+        return hash(self.get_id())
 
 
 @dataclass(frozen=True)
 class SystemGraph:
-    name: str
-    components: FrozenSet[Component]
-    suppliers: FrozenSet[Supplier]
-    security_dependencies: FrozenSet[RiskRelation]
-    offerings: FrozenSet[Offering]
-    indicator: Indicator
+    nodes: Dict[str, Node]
+    edges: List[Edge]
 
-    def valid_values(self) -> bool:
-        parts = all([all([c.valid_values() for c in self.components]),
-                     all([s.valid_values() for s in self.suppliers]),
-                     all([o.valid_values() for o in self.offerings]),
-                     ])
+    @validator('nodes')
+    def node_valid(cls, v):
+        # Keys must be valid identifiers
+        # Names must be unique
+        # (Currently) One name must be 'identifier'
+        invalid = []
+        unique = set()
+        for key in v:
+            if not validate_identifier(key):
+                invalid.append(key)
+            if key in unique:
+                raise ValueError("Node name is not unique: {}".format(key))
+            unique.add(key)
 
-        valid_supplier_ids = set([s.identifier for s in self.suppliers])
-        valid_component_ids = set([c.identifier for c in self.components])
-        all_ids = valid_component_ids.union(valid_supplier_ids)
+        if len(invalid) > 0:
+            raise ValueError("Invalid name(s): {}".format(invalid))
 
-        valid_ids = all([len(self.components) == len(valid_component_ids),
-                         len(self.suppliers) == len(valid_supplier_ids),
-                         len(all_ids) == len(valid_component_ids) + len(valid_supplier_ids)])
+        if 'indicator' not in unique or "indicator" not in v["indicator"].tags:
+            raise ValueError("One node must be named 'indicator' and must have 'indicator' as tag.")
 
-        whole = all([all([o.supplier_id in valid_supplier_ids for o in self.offerings]),
-                     all([o.component_id in valid_component_ids for o in self.offerings]),
-                     all([d.risk_src_id in all_ids for d in self.security_dependencies]),
-                     all([d.risk_dst_id in all_ids for d in self.security_dependencies]),
-                     all([d.risk_src_id in all_ids for d in self.indicator.dependencies])
-                     ])
+        return v
 
-        return parts and whole and valid_ids
+    @validator('edges')
+    def edges_must_refer_to_nodes(cls, v, values):
+        if "nodes" not in values:
+            return v
 
-    def structure(self) -> int:
-        graph = defaultdict(list)
-        for c in self.components:
-            graph[c].append(c.identifier)
-            graph[c].append(c.logic_function)
+        for edge in v:
+            if edge.src not in values["nodes"] or edge.dst not in values["nodes"]:
+                raise ValueError("Edge src node or dst node does not exist: {}".format(edge))
+        return v
 
-        for s in self.suppliers:
-            graph[s].append(s.identifier)
+    def __hash__(self):
+        return hash(self.get_id())
 
-        for e in self.security_dependencies:
-            graph[e.risk_dst_id].append(e.risk_src_id)
-
-        structure = frozenset([tuple(entry) for entry in graph.values()])
-
-        return hash(structure)
+    def get_id(self) -> str:
+        message = ""
+        for key in sorted(self.nodes.keys()):
+            message += (key + self.nodes[key].get_id())
+        for e in sorted(self.edges, key=lambda ed: (ed.src, ed.dst)):
+            message += e.get_id()
+        message_hash = md5(message.encode('utf-8'))
+        return message_hash.hexdigest()
 
 
-def apply_singular_offerings(original: SystemGraph) -> SystemGraph:
-    offering_map = {}
-    for o in original.offerings:
-        offerings_for_component = offering_map.get(o.component_id, [])
-        offerings_for_component.append(o)
-        offering_map[o.component_id] = offerings_for_component
 
-    component_map = {}
-    for c in original.components:
-        component_map[c.identifier] = c
 
-    updated_dependencies = []
-    updated_components = []
-    old_components = set(original.components)
+def validate_data(sg: SystemGraph, data: Dict) -> None:
+    """ A data dictionary is valid only for a particular SystemGraph """
 
-    for component, offerings in offering_map.items():
-        if len(offerings) == 1:
-            offering = offerings[0]
-            old_component = component_map[component]
-            new_component = Component(component,
-                                      old_component.logic_function,
-                                      offering.risk,
-                                      offering.cost)
-            updated_components.append(new_component)
-            updated_dependencies.append(RiskRelation(offering.supplier_id, component))
-            old_components.remove(old_component)
+    # If node data is given, it must be valid and correspond to this System Graph
+    if "nodes" in data:
+        for key, value in data["nodes"].items():
+            if key not in sg.nodes:
+                raise DataValidationError("Node name not in System Graph: {}".format(key))
+            if "risk" in value and not validate_risk(value["risk"]):
+                raise DataValidationError("Risk data is invalid for node: {} {}".format(key, value))
 
-    # transfer unchanged components
-    for old_component in old_components:
-        updated_components.append(old_component)
+    # If edges are described in data dict, edge data must be valid for this System Graph
+    if "edges" in data:
+        for edge in data["edges"]:
+            if "src" not in edge or "dst" not in edge:
+                raise DataValidationError("Edge data missing src or dst field: {}".format(edge))
+            if edge["src"] not in sg.nodes or edge["dst"] not in sg.nodes:
+                raise DataValidationError("Could not find src or dst of edge: {}".format(edge))
+            if "risk" in edge and not validate_risk(edge["risk"]):
+                raise DataValidationError("Risk is not valid for edge: {}".format(edge))
+            if "cost" in edge and not validate_cost(edge["cost"]):
+                raise DataValidationError("Cost is not valid for edge: {}".format(edge))
 
-    updated_dependencies.extend(original.security_dependencies)
 
-    new_sg = SystemGraph(
-        original.name,
-        frozenset(updated_components),
-        original.suppliers,
-        frozenset(updated_dependencies),
-        original.offerings,
-        original.indicator
-    )
-
-    return new_sg

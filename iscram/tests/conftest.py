@@ -1,46 +1,47 @@
 import pytest
 from importlib.resources import read_text
+from typing import Dict
+import json
 
-from iscram.adapters.json import load_system_graph_json_str
-from iscram.tests.unit.domain.model.gen_random_sg import gen_random_tree
+from iscram.domain.model import SystemGraph
+
+
+def get_sg_from_file(filename: str) -> SystemGraph:
+    file_data = read_text("iscram.tests.system_graph_test_data", filename)
+    sg_dict = json.loads(file_data)
+    return SystemGraph(**sg_dict)
+
+
+def get_data_from_file(filename: str) -> Dict:
+    file_data = read_text("iscram.tests.system_graph_test_data", filename)
+    return json.loads(file_data)
 
 
 @pytest.fixture
-def simple_and():
-    json_str = read_text("iscram.tests.system_graph_test_data", "simple_and.json")
-    return load_system_graph_json_str(json_str)
+def minimal():
+    return get_sg_from_file("minimal.json")
 
 
 @pytest.fixture
-def simple_or():
-    json_str = read_text("iscram.tests.system_graph_test_data", "simple_or.json")
-    return load_system_graph_json_str(json_str)
+def diamond():
+    return get_sg_from_file("diamond.json")
+
+
+@pytest.fixture
+def diamond_suppliers():
+    return get_sg_from_file("diamond_suppliers.json")
 
 
 @pytest.fixture
 def canonical():
-    json_str = read_text("iscram.tests.system_graph_test_data", "canonical.json")
-    return load_system_graph_json_str(json_str)
+    return get_sg_from_file("canonical.json")
 
 
 @pytest.fixture
-def non_tree_simple_and():
-    json_str = read_text("iscram.tests.system_graph_test_data", "non_tree_simple_and.json")
-    return load_system_graph_json_str(json_str)
+def full_example_system():
+    return get_sg_from_file("full_example_system.json")
 
 
 @pytest.fixture
-def simple_and_suppliers():
-    json_str = read_text("iscram.tests.system_graph_test_data", "simple_and_suppliers.json")
-    return load_system_graph_json_str(json_str)
-
-
-@pytest.fixture
-def full_example():
-    json_str = read_text("iscram.tests.system_graph_test_data", "full_example.json")
-    return load_system_graph_json_str(json_str)
-
-
-@pytest.fixture
-def rand_tree_sg():
-    return gen_random_tree(10)
+def full_example_data_1():
+    return get_data_from_file("full_example_data_1.json")
