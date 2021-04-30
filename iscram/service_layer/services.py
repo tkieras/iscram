@@ -29,11 +29,11 @@ def apply_prefs(user_prefs):
 
 
 def get_system_graph(sg_id: str, repo: AbstractRepository) -> SystemGraph:
-    return repo.get_graph(sg_id)
+    return repo.get(sg_id)
 
 
 def put_system_graph(sg: SystemGraph, repo: AbstractRepository):
-    repo.put_graph(sg)
+    repo.put(sg)
 
 
 def get_risk(sg: SystemGraph, data: Dict, prefs=None) -> Dict[str, float]:
