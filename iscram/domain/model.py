@@ -1,9 +1,12 @@
 from typing import FrozenSet, Dict, List
 from hashlib import md5
 from dataclasses import field
+from functools import cached_property
 
 from pydantic import validator, root_validator
 from pydantic.dataclasses import dataclass
+
+from iscram.domain.metrics.bdd_functions import build_bdd
 
 
 def validate_identifier(identifier: str) -> bool:
@@ -134,9 +137,10 @@ class SystemGraph:
         return v
 
     def __hash__(self):
-        return hash(self.get_id())
+        return hash(self._id)
 
-    def get_id(self) -> str:
+    @cached_property
+    def _id(self) -> str:
         message = ""
         for key in sorted(self.nodes.keys()):
             message += (key + self.nodes[key].get_id())
@@ -145,7 +149,15 @@ class SystemGraph:
         message_hash = md5(message.encode('utf-8'))
         return message_hash.hexdigest()
 
+    def get_id(self):
+        return self._id
 
+    @cached_property
+    def _bdd_with_root(self):
+        return build_bdd(self)
+
+    def get_bdd_with_root(self):
+        return self._bdd_with_root
 
 
 def validate_data(sg: SystemGraph, data: Dict) -> None:

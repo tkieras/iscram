@@ -1,3 +1,5 @@
+import copy
+
 from iscram.domain.model import (
     Node, Edge, SystemGraph, validate_data
 )
@@ -27,16 +29,24 @@ def test_sg_hash_very_different(minimal: SystemGraph, diamond: SystemGraph):
     assert hash(minimal) != hash(diamond)
 
 
-def test_sg_hash_very_close_node_missing(minimal: SystemGraph):
+def test_sg_hash_same(minimal: SystemGraph):
+    other = copy.deepcopy(minimal)
     pre = hash(minimal)
-    del minimal.nodes["x1"]
-    assert pre != hash(minimal)
+    assert pre == hash(other)
+
+
+def test_sg_hash_very_close_node_missing(minimal: SystemGraph):
+    other = copy.deepcopy(minimal)
+    pre = hash(minimal)
+    del other.nodes["x1"]
+    assert pre != hash(other)
 
 
 def test_sg_hash_very_close_extra_node(minimal: SystemGraph):
+    other = copy.deepcopy(minimal)
     pre = hash(minimal)
-    minimal.nodes["new"] = Node()
-    assert pre != hash(minimal)
+    other.nodes["new"] = Node()
+    assert pre != hash(other)
 
 # Tests for model validation errors
 

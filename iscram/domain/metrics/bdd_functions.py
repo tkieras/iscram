@@ -1,11 +1,10 @@
 import dd.cudd as _bdd
 
-from iscram.domain.model import SystemGraph
 
 fmt_bdd = {"or": " | ", "and": " & "}
 
 
-def build_sg_graph_dict(sg: SystemGraph):
+def build_sg_graph_dict(sg):
     """ Builds a dictionary of dependencies for each node, where each node can have either component
     or supplier dependents or both. If a node has no dependents of a certain type, the key is missing.
     A node with no dependents has an empty dictionary."""
@@ -52,7 +51,7 @@ def recursive_build_expr(sg, g, u, discovered):
         return "( {} )".format(expr)
 
 
-def prep_for_bdd(sg: SystemGraph):
+def prep_for_bdd(sg):
     g = build_sg_graph_dict(sg)
     discovered = []
     r_expr = recursive_build_expr(sg, g, "indicator", discovered)

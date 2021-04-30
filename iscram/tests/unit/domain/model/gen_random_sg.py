@@ -52,4 +52,4 @@ def gen_random_tree(n, save=False, generate_data=True) -> (SystemGraph, Dict):
 
 
 if __name__ == "__main__":
-    gen_random_tree(500, True, False)
+    gen_random_tree(500, True, True)

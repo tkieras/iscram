@@ -28,33 +28,32 @@ def apply_prefs(user_prefs):
     return prefs
 
 
-def get_bdd(sg: SystemGraph, repo: AbstractRepository):
-    bdd_with_root = repo.get(sg, "bdd_with_root")
-    if bdd_with_root is None:
-        bdd_with_root = build_bdd(sg)
-        repo.put(sg, "bdd_with_root", bdd_with_root)
-
-    return bdd_with_root
+def get_system_graph(sg_id: str, repo: AbstractRepository) -> SystemGraph:
+    return repo.get_graph(sg_id)
 
 
-def get_risk(sg: SystemGraph, repo: AbstractRepository, data: Dict, prefs=None) -> Dict[str, float]:
-    bdd_with_root = get_bdd(sg, repo)
+def put_system_graph(sg: SystemGraph, repo: AbstractRepository):
+    repo.put_graph(sg)
+
+
+def get_risk(sg: SystemGraph, data: Dict, prefs=None) -> Dict[str, float]:
+    bdd_with_root = sg.get_bdd_with_root()
     validate_data(sg, data)
     p = provide_p_direct_from_data(sg, data)
     risk = risk_by_bdd(sg, p, bdd_with_root=bdd_with_root)
     return {"system" : risk}
 
 
-def get_birnbaum_structural_importances(sg: SystemGraph, repo: AbstractRepository, data=None, prefs=None) -> Dict[str, float]:
+def get_birnbaum_structural_importances(sg: SystemGraph, data=None, prefs=None) -> Dict[str, float]:
     prefs = apply_prefs(prefs)
-    bdd_with_root = get_bdd(sg, repo)
+    bdd_with_root = sg.get_bdd_with_root()
     result = birnbaum_structural_importance(sg, bdd_with_root=bdd_with_root)
     return apply_scaling(result, prefs["SCALE_METRICS"])
 
 
-def get_birnbaum_importances(sg: SystemGraph, repo: AbstractRepository, data: Dict, data_src: str, prefs=None) -> Dict[str, float]:
+def get_birnbaum_importances(sg: SystemGraph, data: Dict, data_src: str, prefs=None) -> Dict[str, float]:
     prefs = apply_prefs(prefs)
-    bdd_with_root = get_bdd(sg, repo)
+    bdd_with_root = sg.get_bdd_with_root()
     if data_src == "data":
         p = provide_p_direct_from_data(sg, data)
     else:
@@ -64,7 +63,7 @@ def get_birnbaum_importances(sg: SystemGraph, repo: AbstractRepository, data: Di
     return apply_scaling(result, prefs["SCALE_METRICS"])
 
 
-def get_birnbaum_importances_select(sg: SystemGraph, repo: AbstractRepository, data: Dict, selector: Dict, data_src: str, prefs=None) -> Dict[str, Dict[bool, float]]:
+def get_birnbaum_importances_select(sg: SystemGraph, data: Dict, selector: Dict, data_src: str, prefs=None) -> Dict[str, Dict[bool, float]]:
     prefs = apply_prefs(prefs)
 
     select_key = list(selector.keys())
@@ -82,7 +81,7 @@ def get_birnbaum_importances_select(sg: SystemGraph, repo: AbstractRepository, d
         if select_key in attrs and attrs[select_key] == select_value:
             select.append(node)
 
-    bdd_with_root = get_bdd(sg, repo)
+    bdd_with_root = sg.get_bdd_with_root()
     if data_src == "data":
         p = provide_p_direct_from_data(sg, data)
     else:
@@ -92,7 +91,7 @@ def get_birnbaum_importances_select(sg: SystemGraph, repo: AbstractRepository, d
     return {select_key: {select_value: result["select"]}}
 
 
-def get_attribute_sensitivity(sg: SystemGraph, repo: AbstractRepository, data: Dict, data_src: str, prefs: Dict=None) -> Dict[str, Dict[bool, float]]:
+def get_attribute_sensitivity(sg: SystemGraph, data: Dict, data_src: str, prefs: Dict=None) -> Dict[str, Dict[bool, float]]:
     all_attrs = set()
     for node, nodeData in data["nodes"].items():
         if "attributes" in nodeData:
@@ -100,7 +99,7 @@ def get_attribute_sensitivity(sg: SystemGraph, repo: AbstractRepository, data: D
     results = {a: {} for a in all_attrs}
     for attr in all_attrs:
         for value in (True, False):
-            results[attr].update(get_birnbaum_importances_select(sg, repo, data, {attr: value}, data_src, prefs)[attr])
+            results[attr].update(get_birnbaum_importances_select(sg, data, {attr: value}, data_src, prefs)[attr])
 
     return results
 
