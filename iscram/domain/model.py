@@ -1,9 +1,13 @@
-from typing import FrozenSet, Dict, List
+from typing import FrozenSet, Dict, List, Set
 from hashlib import md5
 from dataclasses import field
 from functools import cached_property
+import collections
+import json
+import copy
 
 from pydantic import validator, root_validator
+from pydantic.json import pydantic_encoder
 from pydantic.dataclasses import dataclass
 
 from iscram.domain.metrics.bdd_functions import build_bdd
@@ -104,6 +108,14 @@ class SystemGraph:
     nodes: Dict[str, Node]
     edges: List[Edge]
 
+    @cached_property
+    def components(self):
+        return set(filter(lambda n: "component" in self.nodes[n].tags, self.nodes))
+
+    @cached_property
+    def suppliers(self):
+        return set(filter(lambda n: "supplier" in self.nodes[n].tags, self.nodes))
+
     @validator('nodes')
     def node_valid(cls, v):
         # Keys must be valid identifiers
@@ -139,6 +151,9 @@ class SystemGraph:
     def __hash__(self):
         return hash(self._id)
 
+    def dict(self):
+        return json.loads(json.dumps(self, default=pydantic_encoder))
+
     @cached_property
     def _id(self) -> str:
         message = ""
@@ -158,6 +173,68 @@ class SystemGraph:
 
     def get_bdd_with_root(self):
         return self._bdd_with_root
+
+    @cached_property
+    def supplier_groups(self) -> Dict[str, Set[str]]:
+        """ Returns {root_node: descendants including self} """
+
+        # Every valid supplier graph is a set of rooted, directed graphs where each node is a supplier.
+        # A supplier group is a set of nodes reachable from a root in the supplier graph.
+
+        supplier_graph = {}
+        supplier_set = set(filter(lambda n: "supplier" in self.nodes[n].tags, self.nodes))
+        for e in self.edges:
+            if e.src in supplier_set and e.dst in supplier_set:
+                supplier_graph[e.src] = supplier_graph.get(e.src, []) + [e.dst]
+
+        in_degrees = {}
+        for node, adjs in supplier_graph.items():
+            for adj in adjs:
+                in_degrees[adj] = in_degrees.get(adj, 0) + 1
+        roots = [r for r in filter(lambda n: in_degrees.get(n, 0) == 0, supplier_set)]
+        if not roots:
+            return {}
+        groups = {r: set() for r in roots}
+
+        for r in roots:
+            queue = collections.deque([r])
+            visited = set()
+            while queue:
+                u = queue.pop()
+                if u in visited:
+                    return {}
+                visited.add(u)
+                queue.extend(supplier_graph.get(u, []))
+            groups[r] = visited
+
+        return groups
+
+    def with_suppliers(self, new_edges: List[Edge]):
+        """ Returns a copy of this graph but using the provided suppliers. """
+        # Nodes: All nodes, with "potential" added to tags of nodes with a potential out-edge
+        # Edges: All component srced edges are unchanged
+        #        All supplier-supplier edges are unchanged
+        #        S-C edges in new_edges are included with no tags
+        #        S-C edges in self but not in new_edges are included with tag "potential"
+        edges = set(new_edges)
+        potential_nodes = set()
+
+        for e in self.edges:
+            if e.src in self.components:
+                edges.add(e)
+            elif e.src in self.suppliers and e.dst in self.suppliers:
+                edges.add(e)
+            elif Edge(src=e.src, dst=e.dst) not in edges:
+                edges.add(Edge(src=e.src, dst=e.dst, tags=frozenset(["potential"])))
+                potential_nodes.add(e.src)
+
+        new_nodes = self.nodes.copy()
+        for n_id in potential_nodes:
+            n = new_nodes[n_id]
+            new_node = Node(logic=n.logic, tags=frozenset(list(n.tags) + ["potential"]))
+            new_nodes[n_id] = new_node
+
+        return SystemGraph(nodes=new_nodes, edges=edges)
 
 
 def validate_data(sg: SystemGraph, data: Dict) -> None:

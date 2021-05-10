@@ -111,6 +111,26 @@ This schema can be found in the documentation as 'RequestBody.'
 
 A full example can be found in `iscram/sample-file.json`.
 
+### System Graph IDs, Mutability and Associated Data
+
+A system graph is uniquely identified by an ID obtained from the ISCRAM server.
+
+In general the system graph is treated as an immutable data structure. If, for example, optimization is requested and results in a graph with different nodes, edges or tags, then a new graph is returned with a new ID.
+
+In addition to a system graph, a data object is needed to provide parameters for data such as risk or cost. This data object is also treated as immutable and may be a superset of data needed to analyze a particular graph. For example, data for suppliers that are available but not chosen may be present in data. After optimization, a new graph results that may use a different subset of the data. 
+
+An example workflow would consist of:
+
+	- specifying an initial system graph A
+	- specifying a dataset Z including but not limited to data needed to analyze A
+	- analyzing A against dataset Z
+	- optimizing A -> A'
+	- analyzing A' against dataset Z
+	- optimizing A' -> A''
+	- analyzing A'' against dataset Z
+
+The portion of the dataset that is relevant is determined by the nodes/edges in the system graph.
+
 ### System Graph
 
 A System Graph is structured as follows:
@@ -216,8 +236,40 @@ Edge data may be provided as well, where each item in the edge data list has the
 }
 ```
 
-Edge data is used only for optimization/recommendation services, and plays no role in risk analysis.
+Note that there are two places where a component node risk value may be provided:
 
-Further details can be found by viewing the OpenAPI documentation at:
+- data.nodes
+- data.edges
+
+If the edge data indicates an edge from a supplier to a component node, then the edge represents an "offering" where the supplier may be contracted to provide this particular component. If the supplier is chosen, the component risk becomes the risk specified on the edge.
+
+Since risk analysis may be desirable in situations where the supplier is not known, risk data in data.nodes may be added even when suppliers are not present in the graph.
+
+The risk values provided in data.edges always has priority, and all risk analysis and optimization will use available edge data before resorting to data provided directly on nodes.
+If no risk value is provided in either location, then 0.0 is used.
+
+For example, in a system with x1, x2, x3 as components and s1 as supplier of x1, suppose the following data is provided:
+```
+{ 
+	nodes: {
+		"x1": {"risk": 0.9},
+		"x2": {"risk": 0.8},
+		},
+	edges: [
+		{"src": "s1", "dst": "x1", "risk": 0.01, "cost": 30}
+	]
+}
+```
+
+The risk value for x1 will be 0.01 because s1 is the supplier of x1, and the edge from s1 to x1 holds a risk of 0.01.
+
+The risk value for x2 will be 0.8 because no supplier or supplier edge exists for x2, and so we fall back to data specified directly on the node itself.
+
+Lastly, x3 will have a risk of 0.0 because although it is declared as  a node in the system, no data is provided.
+
+
+## API Documentation
+
+Further details on the API and data structures can be found by viewing the OpenAPI documentation at:
 
 - `localhost:8000/docs`
