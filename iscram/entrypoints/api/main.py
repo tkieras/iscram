@@ -8,6 +8,7 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from iscram.domain.model import SystemGraph, DataValidationError
+from iscram.domain.optimization import OptimizationError
 from iscram.service_layer import services
 from iscram.adapters.repository import LRUCacheRepository, RepositoryLookupError
 
@@ -47,9 +48,23 @@ class AnalysisResponseBody(BaseModel):
     value: Optional[str]
 
 
+class OptimizationResponseBody(BaseModel):
+    sg_id: str
+    system_graph: Dict
+
+
 @app.exception_handler(DataValidationError)
 async def data_validation_error_handler(request: Request, exc: DataValidationError):
     error = dict(msg=exc.message, type="Data Validation Error")
+    return JSONResponse(
+        status_code=400,
+        content=dict(error=error)
+    )
+
+
+@app.exception_handler(OptimizationError)
+async def optimization_error_handler(request: Request, exc: OptimizationError):
+    error = dict(msg=exc.message, type="Optimization Error")
     return JSONResponse(
         status_code=400,
         content=dict(error=error)
@@ -118,6 +133,14 @@ async def attribute_importance_fractional(sg_id: str, rq: RequestBody = Body(...
         return {"name": "attribute_importance_fractional", "payload": {"message": "Not Implemented"}}
     else:
         return dict(name="attribute_importance_fractional", payload=services.get_fractional_importance_traits(sg, rq.data), attribute=attribute, value=value)
+
+
+@app.post("/id/{sg_id}/recommend/component/supplier", response_model=OptimizationResponseBody)
+async def recommend_node_supplier(sg_id: str, alpha: float, budget: int, rq: RequestBody = Body(...)):
+    sg = services.get_system_graph(sg_id, repo)
+    updated = services.get_system_graph_optimized_suppliers(sg, rq.data, {"alpha": alpha, "budget": budget})
+    services.put_system_graph(updated, repo)
+    return dict(sg_id=updated.get_id(), system_graph=updated.dict())
 
 
 @app.get("/status")

@@ -45,3 +45,15 @@ def full_example_system():
 @pytest.fixture
 def full_example_data_1():
     return get_data_from_file("full_example_data_1.json")
+
+
+@pytest.fixture
+def full_with_supplier_choices():
+    return get_sg_from_file("full_with_supplier_choices.json")
+
+
+@pytest.fixture
+def full_with_supplier_choices_data():
+    return get_data_from_file("full_with_supplier_choices_data.json")
+
+

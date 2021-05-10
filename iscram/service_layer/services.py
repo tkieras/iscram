@@ -1,9 +1,9 @@
 from typing import Dict
 
 from iscram.domain.model import SystemGraph, validate_data
+from iscram.domain.optimization import SupplierChoiceProblem
 from iscram.adapters.repository import AbstractRepository
 from iscram.domain.metrics.risk import risk_by_bdd
-from iscram.domain.metrics.bdd_functions import build_bdd
 from iscram.domain.metrics.importance import (
     birnbaum_importance, birnbaum_structural_importance, fractional_importance_of_attributes
 )
@@ -107,3 +107,9 @@ def get_attribute_sensitivity(sg: SystemGraph, data: Dict, data_src: str, prefs:
 def get_fractional_importance_traits(sg: SystemGraph, data: Dict, prefs=None) -> Dict[str, Dict[bool, float]]:
     prefs = apply_prefs(prefs)
     return fractional_importance_of_attributes(sg, data)
+
+
+def get_system_graph_optimized_suppliers(sg: SystemGraph, data: Dict, params: Dict) -> SystemGraph:
+    problem = SupplierChoiceProblem(sg, data)
+    chosen_suppliers, metadata = problem.solve(params)
+    return sg.with_suppliers(chosen_suppliers)
