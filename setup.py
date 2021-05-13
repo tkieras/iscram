@@ -8,7 +8,7 @@ setup(
 	zip_safe=False,
 	install_requires=[
 		"jsons==1.4.0",
-		"pydantic==1.7.3",
+		"pydantic==1.7.4",
 		"uvicorn==0.11.7",
 		"fastapi==0.63.0",
 		"pytest==6.2.2",
