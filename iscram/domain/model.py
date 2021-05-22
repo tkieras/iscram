@@ -4,7 +4,6 @@ from dataclasses import field
 from functools import cached_property
 import collections
 import json
-import copy
 
 from pydantic import validator, root_validator
 from pydantic.json import pydantic_encoder
@@ -217,21 +216,38 @@ class SystemGraph:
         #        S-C edges in new_edges are included with no tags
         #        S-C edges in self but not in new_edges are included with tag "potential"
         edges = set(new_edges)
-        potential_nodes = set()
+        chosen_suppliers = set()
+        for e in edges:
+            if e.src in self.suppliers:
+                chosen_suppliers.add(e.src)
 
+        # @TODO: graph search for all paths to supplier; this affects tagging these intermediaries as not potential
+        # simple addition of involved group leaders
+        for group, members in self.supplier_groups.items():
+            for member in members:
+                if member in chosen_suppliers:
+                    chosen_suppliers.add(group)
+
+        potential_suppliers = set(self.suppliers) - chosen_suppliers
         for e in self.edges:
             if e.src in self.components:
                 edges.add(e)
-            elif e.src in self.suppliers and e.dst in self.suppliers:
-                edges.add(e)
             elif Edge(src=e.src, dst=e.dst) not in edges:
                 edges.add(Edge(src=e.src, dst=e.dst, tags=frozenset(["potential"])))
-                potential_nodes.add(e.src)
 
         new_nodes = self.nodes.copy()
-        for n_id in potential_nodes:
-            n = new_nodes[n_id]
+
+        for n_id in potential_suppliers:
+            n = self.nodes[n_id]
             new_node = Node(logic=n.logic, tags=frozenset(list(n.tags) + ["potential"]))
+            new_nodes[n_id] = new_node
+
+        for n_id in chosen_suppliers:
+            n = self.nodes[n_id]
+            tags = set(n.tags)
+            if "potential" in tags:
+                tags.remove("potential")
+            new_node = Node(logic=n.logic, tags=tags)
             new_nodes[n_id] = new_node
 
         return SystemGraph(nodes=new_nodes, edges=edges)

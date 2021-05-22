@@ -172,15 +172,16 @@ def test_supplier_groups_outer_cycle():
 
 
 def test_with_edges(full_example_system: SystemGraph):
-    new_edges = [("x29", "x1"), ("x28", "x2"), ("x27", "x3"), ("x26", "x4"), ("x25", "x5"), ("x24", "x6"),
+    to_add = [("x29", "x1"), ("x28", "x2"), ("x27", "x3"), ("x26", "x4"), ("x25", "x5"), ("x24", "x6"),
                  ("x23", "x7"), ("x22", "x8"), ("x21", "x9"), ("x20", "x10"), ("x19", "x11"), ("x18", "x12"),
                  ("x17", "x13"), ("x16", "x14"), ("x18", "x15")]
 
-    new_sg = full_example_system.with_suppliers([Edge(src=s, dst=d) for s, d in new_edges])
+    new_edges = [Edge(src=s, dst=d) for s, d in to_add]
+    new_sg = full_example_system.with_suppliers(new_edges)
 
     updated_edges = set(new_sg.edges)
-    for s, d in new_edges:
-        assert(Edge(src=s, dst=d) in updated_edges)
+    for e in new_edges:
+        assert(e in updated_edges)
 
     removed_edges = [("x16", "x1"), ("x17", "x2"), ("x25", "x3"), ("x19", "x4"), ("x20", "x5"), ("x21", "x6"),
                      ("x22", "x7"), ("x23", "x8"), ("x24", "x10"), ("x25", "x9"), ("x26", "x11"), ("x27", "x12"),
