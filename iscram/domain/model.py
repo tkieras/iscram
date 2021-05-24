@@ -232,6 +232,8 @@ class SystemGraph:
         for e in self.edges:
             if e.src in self.components:
                 edges.add(e)
+            elif e.src in chosen_suppliers and e.dst in chosen_suppliers:
+                edges.add(Edge(src=e.src, dst=e.dst))
             elif Edge(src=e.src, dst=e.dst) not in edges:
                 edges.add(Edge(src=e.src, dst=e.dst, tags=frozenset(["potential"])))
 

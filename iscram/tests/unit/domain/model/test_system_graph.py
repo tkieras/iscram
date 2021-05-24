@@ -171,7 +171,7 @@ def test_supplier_groups_outer_cycle():
     assert len(sg.supplier_groups) == 0
 
 
-def test_with_edges(full_example_system: SystemGraph):
+def test_with_edges_basic(full_example_system: SystemGraph):
     to_add = [("x29", "x1"), ("x28", "x2"), ("x27", "x3"), ("x26", "x4"), ("x25", "x5"), ("x24", "x6"),
                  ("x23", "x7"), ("x22", "x8"), ("x21", "x9"), ("x20", "x10"), ("x19", "x11"), ("x18", "x12"),
                  ("x17", "x13"), ("x16", "x14"), ("x18", "x15")]
